@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Tutoriel | Étape 5{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Présentation des fonctionnalités (Étape 5/{{ total_steps }})</h4>
+                </div>
+                <div class="card-body">
+                    <div class="progress mb-4">
+                        <div class="progress-bar" role="progressbar" style="width: {{ progress_percent }}%;" aria-valuenow="{{ progress_percent }}" aria-valuemin="0" aria-valuemax="100">{{ progress_percent }}%</div>
+                    </div>
+                    
+                    <h4 class="mb-4">Découvrez les fonctionnalités spécifiques aux experts-comptables</h4>
+                    
+                    <p>Félicitations ! Votre espace Expert-Comptable est maintenant configuré et prêt à l'emploi.</p>
+                    <p>Voici un aperçu des fonctionnalités spécifiques disponibles pour votre cabinet :</p>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <i class="bi bi-people"></i>
+                                        Gestion des clients
+                                    </h5>
+                                    <p class="card-text">Gérez tous vos clients dans une interface centralisée avec accès en un clic à leurs données comptables.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <i class="bi bi-calendar-check"></i>
+                                        Tableau de bord cabinet
+                                    </h5>
+                                    <p class="card-text">Suivez les échéances fiscales, les missions en cours et les tâches à effectuer pour chaque client.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <i class="bi bi-upload"></i>
+                                        Transfert de données
+                                    </h5>
+                                    <p class="card-text">Importez et exportez facilement les données comptables depuis d'autres systèmes comptables.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <i class="bi bi-file-earmark-text"></i>
+                                        Rapports consolidés
+                                    </h5>
+                                    <p class="card-text">Générez des états financiers consolidés et des indicateurs de performance pour l'ensemble de votre portefeuille clients.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-success mt-3">
+                        <h5><i class="bi bi-star"></i> Fonctionnalités premium</h5>
+                        <p>Votre statut d'expert-comptable vous donne accès à des fonctionnalités avancées comme l'analyse comparative des clients, la détection automatique d'anomalies et le tableau de bord de performance.</p>
+                    </div>
+                    
+                    <div class="ratio ratio-16x9 mb-4">
+                        <img src="https://via.placeholder.com/800x450.png?text=Vid%C3%A9o+de+pr%C3%A9sentation" class="img-fluid" alt="Vidéo de présentation">
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="schedule_demo" name="schedule_demo">
+                            <label class="form-check-label" for="schedule_demo">Je souhaite planifier une démonstration personnalisée</label>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            {% if current_step > 1 %}
+                            <button type="submit" name="action" value="previous" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Précédent
+                            </button>
+                            {% else %}
+                            <div></div> <!-- Espace vide pour maintenir l'alignement -->
+                            {% endif %}
+
+                            <button type="submit" name="action" value="next" class="btn btn-primary">
+                                Terminer la configuration<i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

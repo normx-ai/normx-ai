@@ -1,0 +1,216 @@
+{% extends "users/base.html" %}
+
+{% block title %}Paramètres de sécurité | {{ block.super }}{% endblock %}
+
+{% block user_content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="mb-3">Paramètres de sécurité</h1>
+            <p class="text-muted">Gérez les paramètres de sécurité de votre compte.</p>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-3 mb-4">
+            <div class="list-group">
+                <a href="{% url 'profile' %}" class="list-group-item list-group-item-action">Profil</a>
+                <a href="{% url 'edit_basic_info' %}" class="list-group-item list-group-item-action">Informations de base</a>
+                {% if user.user_type == 'COMPANY' %}
+                <a href="{% url 'edit_company_profile' %}" class="list-group-item list-group-item-action">Profil entreprise</a>
+                <a href="{% url 'accounting_settings' %}" class="list-group-item list-group-item-action">Paramètres comptables</a>
+                {% elif user.user_type == 'ACCOUNTANT' %}
+                <a href="{% url 'edit_accountant_profile' %}" class="list-group-item list-group-item-action">Profil expert-comptable</a>
+                {% endif %}
+                <a href="{% url 'security_settings' %}" class="list-group-item list-group-item-action active">Sécurité</a>
+                <a href="{% url 'change_password' %}" class="list-group-item list-group-item-action">Changer de mot de passe</a>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Mot de passe et connexion</h5>
+                </div>
+                <div class="card-body">
+                    <p>Votre dernier changement de mot de passe: <strong>{{ user.password_changed_at|default:"Jamais" }}</strong></p>
+                    <p>Dernière connexion: <strong>{{ user.last_login|date:"d/m/Y H:i" }}</strong></p>
+                    <p>Adresse IP de dernière connexion: <strong>{{ user.last_login_ip|default:"Inconnue" }}</strong></p>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                        <a href="{% url 'change_password' %}" class="btn btn-primary">
+                            <i class="bi bi-key"></i> Changer de mot de passe
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Authentification à deux facteurs (A2F)</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <p class="mb-0">
+                                {% if user.mfa_enabled %}
+                                <span class="badge bg-success">Activée</span> L'authentification à deux facteurs est activée pour votre compte.
+                                {% else %}
+                                <span class="badge bg-warning">Désactivée</span> L'authentification à deux facteurs n'est pas activée pour votre compte.
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div>
+                            {% if user.mfa_enabled %}
+                            <a href="{% url 'disable_mfa' %}" class="btn btn-outline-danger">
+                                <i class="bi bi-shield-lock"></i> Désactiver
+                            </a>
+                            {% else %}
+                            <a href="{% url 'enable_mfa' %}" class="btn btn-outline-success">
+                                <i class="bi bi-shield-check"></i> Activer
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle-fill"></i> L'authentification à deux facteurs ajoute une couche de sécurité supplémentaire à votre compte en demandant un code en plus de votre mot de passe lors de la connexion.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Sessions actives</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Appareil</th>
+                                    <th>Navigateur</th>
+                                    <th>Adresse IP</th>
+                                    <th>Date</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for device in user.known_devices|slice:":5" %}
+                                <tr>
+                                    <td>
+                                        {% if 'Mobile' in device.user_agent %}
+                                        <i class="bi bi-phone"></i> Mobile
+                                        {% elif 'Tablet' in device.user_agent %}
+                                        <i class="bi bi-tablet"></i> Tablette
+                                        {% else %}
+                                        <i class="bi bi-laptop"></i> Ordinateur
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if 'Chrome' in device.user_agent %}
+                                        Chrome
+                                        {% elif 'Firefox' in device.user_agent %}
+                                        Firefox
+                                        {% elif 'Safari' in device.user_agent %}
+                                        Safari
+                                        {% elif 'Edge' in device.user_agent %}
+                                        Edge
+                                        {% else %}
+                                        Navigateur inconnu
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ device.ip_address|default:"Inconnue" }}</td>
+                                    <td>{{ device.timestamp|date:"d/m/Y H:i" }}</td>
+                                    <td>
+                                        <form method="post" action="{% url 'terminate_session' %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="session_key" value="{{ forloop.counter }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="bi bi-x-circle"></i> Déconnecter
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center">Aucune session active</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <form method="post" action="{% url 'terminate_all_sessions' %}" class="mt-3">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-x-octagon"></i> Déconnecter toutes les autres sessions
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Historique de connexion</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Adresse IP</th>
+                                    <th>Appareil</th>
+                                    <th>Statut</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for entry in user.login_history|slice:":5" %}
+                                <tr>
+                                    <td>{{ entry.timestamp|date:"d/m/Y H:i" }}</td>
+                                    <td>{{ entry.ip_address|default:"Inconnue" }}</td>
+                                    <td>
+                                        {% if entry.device_info %}
+                                            {% if 'Mobile' in entry.device_info.user_agent %}
+                                            <i class="bi bi-phone"></i> Mobile
+                                            {% elif 'Tablet' in entry.device_info.user_agent %}
+                                            <i class="bi bi-tablet"></i> Tablette
+                                            {% else %}
+                                            <i class="bi bi-laptop"></i> Ordinateur
+                                            {% endif %}
+                                        {% else %}
+                                            <i class="bi bi-question-circle"></i> Inconnu
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if entry.success %}
+                                        <span class="badge bg-success">Réussie</span>
+                                        {% else %}
+                                        <span class="badge bg-danger">Échouée</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center">Aucun historique de connexion</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block user_extra_css %}
+<style>
+    .badge {
+        font-size: 0.8rem;
+        padding: 0.35em 0.65em;
+    }
+</style>
+{% endblock %}

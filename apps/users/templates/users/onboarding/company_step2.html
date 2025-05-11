@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}Configuration de l'exercice fiscal | Étape 2{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Configuration de l'exercice fiscal (Étape 2/{{ total_steps }})</h4>
+                </div>
+                <div class="card-body">
+                    <div class="progress mb-4">
+                        <div class="progress-bar" role="progressbar" style="width: {{ progress_percent }}%;" aria-valuenow="{{ progress_percent }}" aria-valuemin="0" aria-valuemax="100">{{ progress_percent }}%</div>
+                    </div>
+                    
+                    <h4 class="mb-4">Définissons votre exercice fiscal</h4>
+                    
+                    <p>L'exercice fiscal est la période utilisée pour établir vos états financiers annuels.</p>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="fiscal_year_start" class="form-label">Date de début de l'exercice fiscal</label>
+                            <input type="date" class="form-control" id="fiscal_year_start" name="fiscal_year_start" required>
+                            <small class="text-muted">La plupart des entreprises utilisent le 1er janvier comme date de début.</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="fiscal_year_end" class="form-label">Date de fin de l'exercice fiscal</label>
+                            <input type="date" class="form-control" id="fiscal_year_end" name="fiscal_year_end" required>
+                            <small class="text-muted">La plupart des entreprises utilisent le 31 décembre comme date de fin.</small>
+                        </div>
+                        
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="same_as_calendar" name="same_as_calendar" checked>
+                            <label class="form-check-label" for="same_as_calendar">Utiliser l'année civile (1er janvier - 31 décembre)</label>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            {% if current_step > 1 %}
+                            <button type="submit" name="action" value="previous" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Précédent
+                            </button>
+                            {% else %}
+                            <div></div> <!-- Espace vide pour maintenir l'alignement -->
+                            {% endif %}
+
+                            <button type="submit" name="action" value="next" class="btn btn-primary">
+                                Continuer<i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Définir les dates par défaut (année civile)
+        const currentYear = new Date().getFullYear();
+        document.getElementById('fiscal_year_start').value = `${currentYear}-01-01`;
+        document.getElementById('fiscal_year_end').value = `${currentYear}-12-31`;
+        
+        // Gérer la case à cocher pour l'année civile
+        const sameAsCalendarCheckbox = document.getElementById('same_as_calendar');
+        const startDateInput = document.getElementById('fiscal_year_start');
+        const endDateInput = document.getElementById('fiscal_year_end');
+        
+        sameAsCalendarCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                startDateInput.value = `${currentYear}-01-01`;
+                endDateInput.value = `${currentYear}-12-31`;
+                startDateInput.disabled = true;
+                endDateInput.disabled = true;
+            } else {
+                startDateInput.disabled = false;
+                endDateInput.disabled = false;
+            }
+        });
+        
+        // Appliquer l'état initial
+        if (sameAsCalendarCheckbox.checked) {
+            startDateInput.disabled = true;
+            endDateInput.disabled = true;
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %}

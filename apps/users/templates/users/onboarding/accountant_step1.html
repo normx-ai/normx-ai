@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Bienvenue sur Normx-AI | Étape 1{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Configuration de votre cabinet (Étape 1/{{ total_steps }})</h4>
+                </div>
+                <div class="card-body">
+                    <div class="progress mb-4">
+                        <div class="progress-bar" role="progressbar" style="width: {{ progress_percent }}%;" aria-valuenow="{{ progress_percent }}" aria-valuemin="0" aria-valuemax="100">{{ progress_percent }}%</div>
+                    </div>
+                    
+                    <h4 class="mb-4">Bienvenue sur Normx-AI pour experts-comptables!</h4>
+                    
+                    <p class="lead">Votre plateforme avancée de comptabilité avec IA pour gérer efficacement vos clients.</p>
+                    
+                    <div class="alert alert-info">
+                        <h5>Avantages pour votre cabinet :</h5>
+                        <ul>
+                            <li>Gestion centralisée de tous vos clients</li>
+                            <li>Automatisation des tâches comptables répétitives</li>
+                            <li>Conformité OHADA garantie et mise à jour</li>
+                            <li>Outils d'analyse financière avec IA pour vos clients</li>
+                            <li>Collaboration en temps réel avec vos clients</li>
+                        </ul>
+                    </div>
+                    
+                    <p>Nous allons maintenant vous guider à travers quelques étapes pour configurer votre cabinet et commencer à utiliser toutes les fonctionnalités avancées de Normx-AI.</p>
+                    
+                    <p>Cette configuration initiale ne prendra que quelques minutes et vous permettra de tirer le meilleur parti de notre plateforme.</p>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-between mt-4">
+                            {% if current_step > 1 %}
+                            <button type="submit" name="action" value="previous" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Précédent
+                            </button>
+                            {% else %}
+                            <div></div> <!-- Espace vide pour maintenir l'alignement -->
+                            {% endif %}
+
+                            <button type="submit" name="action" value="next" class="btn btn-primary">
+                                Commencer la configuration<i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,134 @@
+{% extends "users/base.html" %}
+
+{% block title %}Tableau de bord | {{ block.super }}{% endblock %}
+
+{% block user_content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="mb-3">Tableau de bord de l'entreprise</h1>
+            <p class="lead">Bienvenue, {{ user.get_full_name }}!</p>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Informations de l'entreprise</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Nom:</strong> {{ profile.company_name }}</p>
+                    <p><strong>Forme juridique:</strong> {{ profile.legal_form }}</p>
+                    <p><strong>Système comptable:</strong> {{ profile.get_accounting_system_display }}</p>
+                    <a href="{% url 'edit_company_profile' %}" class="btn btn-outline-primary mt-2">Modifier le profil</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Raccourcis</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <a href="#" class="list-group-item list-group-item-action">Saisir une opération comptable</a>
+                        <a href="#" class="list-group-item list-group-item-action">Consulter le plan comptable</a>
+                        <a href="#" class="list-group-item list-group-item-action">Générer un rapport</a>
+                        <a href="#" class="list-group-item list-group-item-action">Inviter un collaborateur</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Notifications</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i> Déclaration TVA à soumettre avant le 30 du mois
+                    </div>
+                    <div class="alert alert-info" role="alert">
+                        <i class="fas fa-info-circle me-2"></i> 3 nouvelles fonctionnalités disponibles
+                    </div>
+                    <div class="alert alert-success" role="alert">
+                        <i class="fas fa-check-circle me-2"></i> Réconciliation bancaire terminée
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-8 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">Activité récente</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">Facture #12345 enregistrée</h6>
+                                <small>il y a 3 heures</small>
+                            </div>
+                            <p class="mb-1">Facture fournisseur pour les fournitures de bureau</p>
+                        </div>
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">Paiement salarial effectué</h6>
+                                <small>hier</small>
+                            </div>
+                            <p class="mb-1">Paiement des salaires pour le mois en cours</p>
+                        </div>
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">Rapport mensuel généré</h6>
+                                <small>il y a 2 jours</small>
+                            </div>
+                            <p class="mb-1">Rapport financier pour le mois précédent</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">Aide & support</h5>
+                </div>
+                <div class="card-body">
+                    <p>Besoin d'aide avec le système comptable?</p>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-primary">
+                            <i class="fas fa-robot me-2"></i> Consulter l'agent IA
+                        </button>
+                        <button class="btn btn-outline-success">
+                            <i class="fas fa-book me-2"></i> Voir les tutoriels
+                        </button>
+                        <button class="btn btn-outline-info">
+                            <i class="fas fa-headset me-2"></i> Contacter le support
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block user_extra_css %}
+<style>
+    .card {
+        transition: transform 0.3s;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+    }
+</style>
+{% endblock %}

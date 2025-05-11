@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from django import forms
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm, SetPasswordForm
@@ -28,22 +29,22 @@ class LoginForm(AuthenticationForm):
         # Personnalisation des erreurs
         self.error_messages.update({
             'invalid_login': _("Email ou mot de passe incorrect."),
-            'inactive': _("Ce compte n'est pas activÈ. Veuillez vÈrifier votre email.")
+            'inactive': _("Ce compte n'est pas activ√©. Veuillez v√©rifier votre email.")
         })
 
 class VerificationCodeForm(forms.Form):
-    """Formulaire de saisie du code de vÈrification"""
+    """Formulaire de saisie du code de v√©rification"""
     code = forms.CharField(
-        label=_("Code de vÈrification"),
+        label=_("Code de v√©rification"),
         min_length=6,
         max_length=6,
         widget=forms.TextInput(attrs={
-            'placeholder': _('Code ‡ 6 chiffres'),
+            'placeholder': _('Code √† 6 chiffres'),
             'autofocus': True,
             'inputmode': 'numeric',
             'pattern': '[0-9]*'
         }),
-        help_text=_("Saisissez le code ‡ 6 chiffres envoyÈ ‡ votre adresse email")
+        help_text=_("Saisissez le code √† 6 chiffres envoy√© √† votre adresse email")
     )
     
     def clean_code(self):
@@ -53,18 +54,18 @@ class VerificationCodeForm(forms.Form):
         return code
 
 class MFAVerificationForm(forms.Form):
-    """Formulaire de saisie du code d'authentification ‡ deux facteurs"""
+    """Formulaire de saisie du code d'authentification √† deux facteurs"""
     code = forms.CharField(
         label=_("Code d'authentification"),
         min_length=6,
         max_length=6,
         widget=forms.TextInput(attrs={
-            'placeholder': _('Code ‡ 6 chiffres'),
+            'placeholder': _('Code √† 6 chiffres'),
             'autofocus': True,
             'inputmode': 'numeric',
             'pattern': '[0-9]*'
         }),
-        help_text=_("Saisissez le code ‡ 6 chiffres gÈnÈrÈ par votre application d'authentification")
+        help_text=_("Saisissez le code √† 6 chiffres g√©n√©r√© par votre application d'authentification")
     )
     
     def clean_code(self):
@@ -74,21 +75,21 @@ class MFAVerificationForm(forms.Form):
         return code
 
 class PasswordResetRequestForm(PasswordResetForm):
-    """Formulaire de demande de rÈinitialisation de mot de passe"""
+    """Formulaire de demande de r√©initialisation de mot de passe"""
     email = forms.EmailField(
         label=_("Email"),
         max_length=254,
         widget=forms.EmailInput(attrs={'placeholder': _('Email')}),
-        help_text=_("Saisissez l'adresse email associÈe ‡ votre compte.")
+        help_text=_("Saisissez l'adresse email associ√©e √† votre compte.")
     )
 
 class PasswordResetConfirmForm(SetPasswordForm):
-    """Formulaire de dÈfinition du nouveau mot de passe"""
+    """Formulaire de d√©finition du nouveau mot de passe"""
     new_password1 = forms.CharField(
         label=_("Nouveau mot de passe"),
         widget=forms.PasswordInput(attrs={'placeholder': _('Nouveau mot de passe')}),
         strip=False,
-        help_text=_("Le mot de passe doit comporter au moins 8 caractËres et inclure des lettres, chiffres et caractËres spÈciaux.")
+        help_text=_("Le mot de passe doit comporter au moins 8 caract√®res et inclure des lettres, chiffres et caract√®res sp√©ciaux.")
     )
     new_password2 = forms.CharField(
         label=_("Confirmation du mot de passe"),
@@ -97,14 +98,17 @@ class PasswordResetConfirmForm(SetPasswordForm):
     )
 
 class UserTypeSelectForm(forms.Form):
-    """Formulaire de sÈlection du type d'utilisateur lors de l'inscription"""
+    """Formulaire de s√©lection du type d'utilisateur lors de l'inscription"""
     user_type = forms.ChoiceField(
         label=_("Type de compte"),
         choices=UserType.choices,
         widget=forms.RadioSelect(),
         initial=UserType.COMPANY,
-        help_text=_("SÈlectionnez le type de compte que vous souhaitez crÈer")
+        help_text=_("S√©lectionnez le type de compte que vous souhaitez cr√©er")
     )
+
+    def __str__(self):
+        return f"UserTypeSelectForm(choices={UserType.choices})"
 
 class CompanyRegistrationForm(forms.ModelForm):
     """Formulaire d'inscription pour les entreprises"""
@@ -112,13 +116,13 @@ class CompanyRegistrationForm(forms.ModelForm):
     email = forms.EmailField(
         label=_("Email"),
         widget=forms.EmailInput(attrs={'placeholder': _('Email')}),
-        help_text=_("Cet email sera utilisÈ comme identifiant de connexion")
+        help_text=_("Cet email sera utilis√© comme identifiant de connexion")
     )
     password1 = forms.CharField(
         label=_("Mot de passe"),
         strip=False,
         widget=forms.PasswordInput(attrs={'placeholder': _('Mot de passe')}),
-        help_text=_("Le mot de passe doit comporter au moins 8 caractËres et inclure des lettres, chiffres et caractËres spÈciaux.")
+        help_text=_("Le mot de passe doit comporter au moins 8 caract√®res et inclure des lettres, chiffres et caract√®res sp√©ciaux.")
     )
     password2 = forms.CharField(
         label=_("Confirmation du mot de passe"),
@@ -128,9 +132,9 @@ class CompanyRegistrationForm(forms.ModelForm):
     
     # Informations personnelles
     first_name = forms.CharField(
-        label=_("PrÈnom"),
+        label=_("Pr√©nom"),
         max_length=30,
-        widget=forms.TextInput(attrs={'placeholder': _('PrÈnom')}),
+        widget=forms.TextInput(attrs={'placeholder': _('Pr√©nom')}),
     )
     last_name = forms.CharField(
         label=_("Nom"),
@@ -138,7 +142,7 @@ class CompanyRegistrationForm(forms.ModelForm):
         widget=forms.TextInput(attrs={'placeholder': _('Nom')}),
     )
     phone_number = forms.CharField(
-        label=_("NumÈro de tÈlÈphone"),
+        label=_("Num√©ro de t√©l√©phone"),
         max_length=15,
         widget=forms.TextInput(attrs={'placeholder': _('Ex: +22961234567')}),
     )
@@ -150,7 +154,7 @@ class CompanyRegistrationForm(forms.ModelForm):
     
     # Consentement
     terms_accepted = forms.BooleanField(
-        label=_("J'accepte les conditions d'utilisation et la politique de confidentialitÈ"),
+        label=_("J'accepte les conditions d'utilisation et la politique de confidentialit√©"),
         required=True,
     )
     
@@ -164,11 +168,11 @@ class CompanyRegistrationForm(forms.ModelForm):
         widgets = {
             'company_name': forms.TextInput(attrs={'placeholder': _('Nom de l\'entreprise')}),
             'legal_form': forms.TextInput(attrs={'placeholder': _('Ex: SARL, SA, EI')}),
-            'tax_id': forms.TextInput(attrs={'placeholder': _('NumÈro d\'identification fiscale')}),
+            'tax_id': forms.TextInput(attrs={'placeholder': _('Num√©ro d\'identification fiscale')}),
             'address': forms.TextInput(attrs={'placeholder': _('Adresse')}),
             'city': forms.TextInput(attrs={'placeholder': _('Ville')}),
             'postal_code': forms.TextInput(attrs={'placeholder': _('Code postal')}),
-            'country': forms.TextInput(attrs={'placeholder': _('Pays'), 'value': 'BÈnin'}),
+            'country': forms.TextInput(attrs={'placeholder': _('Pays'), 'value': 'B√©nin'}),
         }
     
     def clean_password2(self):
@@ -178,25 +182,25 @@ class CompanyRegistrationForm(forms.ModelForm):
         if password1 and password2 and password1 != password2:
             raise forms.ValidationError(_("Les mots de passe ne correspondent pas."))
         
-        # Valider la complexitÈ du mot de passe
+        # Valider la complexit√© du mot de passe
         validate_password(password2)
         return password2
     
     def clean_email(self):
         email = self.cleaned_data.get('email')
         if User.objects.filter(email=email).exists():
-            raise forms.ValidationError(_("Cette adresse email est dÈj‡ utilisÈe."))
+            raise forms.ValidationError(_("Cette adresse email est d√©j√† utilis√©e."))
         return email
     
     def clean_tax_id(self):
         tax_id = self.cleaned_data.get('tax_id')
         if CompanyProfile.objects.filter(tax_id=tax_id).exists():
-            raise forms.ValidationError(_("Ce numÈro d'identification fiscale est dÈj‡ enregistrÈ."))
+            raise forms.ValidationError(_("Ce num√©ro d'identification fiscale est d√©j√† enregistr√©."))
         return tax_id
     
     def save(self, commit=True):
-        # Cette mÈthode ne crÈe pas rÈellement l'utilisateur,
-        # elle prÈpare juste les donnÈes pour RegistrationService
+        # Cette m√©thode ne cr√©e pas r√©ellement l'utilisateur,
+        # elle pr√©pare juste les donn√©es pour RegistrationService
         return self.cleaned_data
 
 class AccountantRegistrationForm(forms.ModelForm):
@@ -205,13 +209,13 @@ class AccountantRegistrationForm(forms.ModelForm):
     email = forms.EmailField(
         label=_("Email"),
         widget=forms.EmailInput(attrs={'placeholder': _('Email')}),
-        help_text=_("Cet email sera utilisÈ comme identifiant de connexion")
+        help_text=_("Cet email sera utilis√© comme identifiant de connexion")
     )
     password1 = forms.CharField(
         label=_("Mot de passe"),
         strip=False,
         widget=forms.PasswordInput(attrs={'placeholder': _('Mot de passe')}),
-        help_text=_("Le mot de passe doit comporter au moins 8 caractËres et inclure des lettres, chiffres et caractËres spÈciaux.")
+        help_text=_("Le mot de passe doit comporter au moins 8 caract√®res et inclure des lettres, chiffres et caract√®res sp√©ciaux.")
     )
     password2 = forms.CharField(
         label=_("Confirmation du mot de passe"),
@@ -221,9 +225,9 @@ class AccountantRegistrationForm(forms.ModelForm):
     
     # Informations personnelles
     first_name = forms.CharField(
-        label=_("PrÈnom"),
+        label=_("Pr√©nom"),
         max_length=30,
-        widget=forms.TextInput(attrs={'placeholder': _('PrÈnom')}),
+        widget=forms.TextInput(attrs={'placeholder': _('Pr√©nom')}),
     )
     last_name = forms.CharField(
         label=_("Nom"),
@@ -231,29 +235,29 @@ class AccountantRegistrationForm(forms.ModelForm):
         widget=forms.TextInput(attrs={'placeholder': _('Nom')}),
     )
     phone_number = forms.CharField(
-        label=_("NumÈro de tÈlÈphone"),
+        label=_("Num√©ro de t√©l√©phone"),
         max_length=15,
         widget=forms.TextInput(attrs={'placeholder': _('Ex: +22961234567')}),
     )
     
     # Certifications
     syscohada_certified = forms.BooleanField(
-        label=_("Je suis certifiÈ SYSCOHADA"),
+        label=_("Je suis certifi√© SYSCOHADA"),
         required=False,
         initial=True
     )
     sysbenyl_certified = forms.BooleanField(
-        label=_("Je suis certifiÈ SYSBENYL"),
+        label=_("Je suis certifi√© SYSBENYL"),
         required=False
     )
     minimal_certified = forms.BooleanField(
-        label=_("Je suis certifiÈ SystËme minimal"),
+        label=_("Je suis certifi√© Syst√®me minimal"),
         required=False
     )
     
     # Consentement
     terms_accepted = forms.BooleanField(
-        label=_("J'accepte les conditions d'utilisation et la politique de confidentialitÈ"),
+        label=_("J'accepte les conditions d'utilisation et la politique de confidentialit√©"),
         required=True,
     )
     
@@ -265,11 +269,11 @@ class AccountantRegistrationForm(forms.ModelForm):
         ]
         widgets = {
             'firm_name': forms.TextInput(attrs={'placeholder': _('Nom du cabinet')}),
-            'professional_id': forms.TextInput(attrs={'placeholder': _('NumÈro d\'agrÈment professionnel')}),
+            'professional_id': forms.TextInput(attrs={'placeholder': _('Num√©ro d\'agr√©ment professionnel')}),
             'address': forms.TextInput(attrs={'placeholder': _('Adresse')}),
             'city': forms.TextInput(attrs={'placeholder': _('Ville')}),
             'postal_code': forms.TextInput(attrs={'placeholder': _('Code postal')}),
-            'country': forms.TextInput(attrs={'placeholder': _('Pays'), 'value': 'BÈnin'}),
+            'country': forms.TextInput(attrs={'placeholder': _('Pays'), 'value': 'B√©nin'}),
         }
     
     def clean_password2(self):
@@ -279,23 +283,23 @@ class AccountantRegistrationForm(forms.ModelForm):
         if password1 and password2 and password1 != password2:
             raise forms.ValidationError(_("Les mots de passe ne correspondent pas."))
         
-        # Valider la complexitÈ du mot de passe
+        # Valider la complexit√© du mot de passe
         validate_password(password2)
         return password2
     
     def clean_email(self):
         email = self.cleaned_data.get('email')
         if User.objects.filter(email=email).exists():
-            raise forms.ValidationError(_("Cette adresse email est dÈj‡ utilisÈe."))
+            raise forms.ValidationError(_("Cette adresse email est d√©j√† utilis√©e."))
         return email
     
     def clean_professional_id(self):
         professional_id = self.cleaned_data.get('professional_id')
         if AccountantProfile.objects.filter(professional_id=professional_id).exists():
-            raise forms.ValidationError(_("Ce numÈro d'agrÈment professionnel est dÈj‡ enregistrÈ."))
+            raise forms.ValidationError(_("Ce num√©ro d'agr√©ment professionnel est d√©j√† enregistr√©."))
         return professional_id
     
     def save(self, commit=True):
-        # Cette mÈthode ne crÈe pas rÈellement l'utilisateur,
-        # elle prÈpare juste les donnÈes pour RegistrationService
+        # Cette m√©thode ne cr√©e pas r√©ellement l'utilisateur,
+        # elle pr√©pare juste les donn√©es pour RegistrationService
         return self.cleaned_data

@@ -31,12 +31,12 @@ class UserType(models.TextChoices):
 
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(_('adresse email'), unique=True)
-    first_name = models.CharField(_('prÈnom'), max_length=30)
+    first_name = models.CharField(_('pr√©nom'), max_length=30)
     last_name = models.CharField(_('nom'), max_length=150)
     phone_number = models.CharField(
-        _('numÈro de tÈlÈphone'), 
+        _('num√©ro de t√©l√©phone'), 
         max_length=15,
-        validators=[RegexValidator(regex=r'^\+?1?\d{9,15}$', message=_("Le numÈro de tÈlÈphone doit Ítre au format: '+999999999'."))]
+        validators=[RegexValidator(regex=r'^\+?1?\d{9,15}$', message=_("Le num√©ro de t√©l√©phone doit √™tre au format: '+999999999'."))]
     )
     user_type = models.CharField(
         _('type d\'utilisateur'),
@@ -45,18 +45,18 @@ class User(AbstractBaseUser, PermissionsMixin):
         default=UserType.COMPANY,
     )
     
-    # Champs statut et sÈcuritÈ
+    # Champs statut et s√©curit√©
     is_active = models.BooleanField(_('actif'), default=False)
-    is_verified = models.BooleanField(_('vÈrifiÈ'), default=False)
+    is_verified = models.BooleanField(_('v√©rifi√©'), default=False)
     is_staff = models.BooleanField(_('membre du staff'), default=False)
     date_joined = models.DateTimeField(_('date d\'inscription'), default=timezone.now)
-    last_login = models.DateTimeField(_('derniËre connexion'), null=True, blank=True)
-    failed_login_attempts = models.PositiveSmallIntegerField(_('tentatives de connexion ÈchouÈes'), default=0)
-    locked_until = models.DateTimeField(_('verrouillÈ jusqu\'‡'), null=True, blank=True)
-    mfa_enabled = models.BooleanField(_('authentification ‡ deux facteurs activÈe'), default=False)
+    last_login = models.DateTimeField(_('derni√®re connexion'), null=True, blank=True)
+    failed_login_attempts = models.PositiveSmallIntegerField(_('tentatives de connexion √©chou√©es'), default=0)
+    locked_until = models.DateTimeField(_('verrouill√© jusqu\'√†'), null=True, blank=True)
+    mfa_enabled = models.BooleanField(_('authentification √† deux facteurs activ√©e'), default=False)
     
-    # TraÁage
-    last_login_ip = models.GenericIPAddressField(_('IP de derniËre connexion'), null=True, blank=True)
+    # Tra√ßage
+    last_login_ip = models.GenericIPAddressField(_('IP de derni√®re connexion'), null=True, blank=True)
     known_devices = models.JSONField(_('appareils connus'), default=list, blank=True)
     login_history = models.JSONField(_('historique de connexion'), default=list, blank=True)
     
@@ -98,18 +98,18 @@ class User(AbstractBaseUser, PermissionsMixin):
         if not success:
             self.failed_login_attempts += 1
             
-            # AprËs 5 tentatives, on verrouille le compte pour 1 heure
+            # Apr√®s 5 tentatives, on verrouille le compte pour 1 heure
             if self.failed_login_attempts >= 5:
                 self.lock_account(60)
             
             self.save(update_fields=['failed_login_attempts', 'locked_until'])
         else:
-            # RÈinitialiser les tentatives ÈchouÈes lors d'une connexion rÈussie
+            # R√©initialiser les tentatives √©chou√©es lors d'une connexion r√©ussie
             self.failed_login_attempts = 0
             self.last_login = timestamp
             self.last_login_ip = ip_address
             
-            # Ajouter l'appareil aux appareils connus si ce n'est pas dÈj‡ fait
+            # Ajouter l'appareil aux appareils connus si ce n'est pas d√©j√† fait
             if device_info and device_info not in self.known_devices:
                 self.known_devices.append(device_info)
             
@@ -121,7 +121,7 @@ class User(AbstractBaseUser, PermissionsMixin):
                 'success': True
             }
             
-            # Limiter l'historique ‡ 10 entrÈes
+            # Limiter l'historique √† 10 entr√©es
             self.login_history = [login_entry] + self.login_history[:9]
             
             self.save(update_fields=[

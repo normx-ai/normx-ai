@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}Inscription | Normx-AI{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-8 col-lg-7">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Inscription à Normx-AI</h4>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <i class="fas fa-user-plus fa-4x text-primary mb-3"></i>
+                    <h3>Bienvenue sur Normx-AI</h3>
+                    <p class="lead">Sélectionnez le type de compte que vous souhaitez créer</p>
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+
+                    <!-- Debug info -->
+                    <pre class="d-none">{{ form }}</pre>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body text-center p-4">
+                                    <input type="radio" class="btn-check" name="user_type" id="user_type_COMPANY" value="COMPANY" checked>
+                                    <label class="btn btn-outline-primary w-100 h-100 d-flex flex-column justify-content-between" for="user_type_COMPANY">
+                                        <div>
+                                            <i class="fas fa-building fa-4x mb-3"></i>
+                                            <h5>Je suis une entreprise ou organisation</h5>
+                                        </div>
+                                        <p class="text-muted small">Créez un compte pour gérer votre comptabilité d'entreprise</p>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body text-center p-4">
+                                    <input type="radio" class="btn-check" name="user_type" id="user_type_ACCOUNTANT" value="ACCOUNTANT">
+                                    <label class="btn btn-outline-primary w-100 h-100 d-flex flex-column justify-content-between" for="user_type_ACCOUNTANT">
+                                        <div>
+                                            <i class="fas fa-calculator fa-4x mb-3"></i>
+                                            <h5>Je suis un expert-comptable</h5>
+                                        </div>
+                                        <p class="text-muted small">Créez un compte pour gérer vos clients et services comptables</p>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 mb-3">
+                        <button type="submit" class="btn btn-primary">Continuer</button>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <h5>Informations de débogage</h5>
+                        <p>Si vous rencontrez des problèmes lors de l'inscription, veuillez contacter le support en fournissant les informations suivantes :</p>
+                        <code>
+                            Page : Sélection du type d'utilisateur<br>
+                            Formulaire : UserTypeSelectForm
+                        </code>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer text-center">
+                <p class="mb-0">Déjà inscrit? <a href="{% url 'login' %}" class="text-decoration-none">Se connecter</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+    
+    .card {
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    
+    .card-header {
+        border-bottom: none;
+    }
+    
+    .btn-check:checked + .btn-outline-primary {
+        color: #fff;
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+    
+    .btn-outline-primary {
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    
+    .btn-outline-primary:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn-primary {
+        padding: 10px;
+        border-radius: 5px;
+    }
+</style>
+{% endblock %}

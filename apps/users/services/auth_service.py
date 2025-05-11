@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import random
 import string
 import logging
@@ -12,42 +13,42 @@ from ..models import User, UserType, CompanyProfile, AccountantProfile
 logger = logging.getLogger(__name__)
 
 class VerificationService:
-    """Service de gestion des codes de vérification et activation des comptes"""
+    """Service de gestion des codes de vÃ©rification et activation des comptes"""
     
     CODE_LENGTH = 6
     CODE_EXPIRY_MINUTES = 30
     
     @staticmethod
     def generate_verification_code():
-        """Génère un code de vérification numérique à 6 chiffres"""
+        """GÃ©nÃ¨re un code de vÃ©rification numÃ©rique Ã  6 chiffres"""
         return ''.join(random.choices(string.digits, k=VerificationService.CODE_LENGTH))
     
     @staticmethod
     def is_code_valid(code, stored_code, created_at):
-        """Vérifie si un code est valide et non expiré"""
+        """VÃ©rifie si un code est valide et non expirÃ©"""
         if not stored_code or not created_at:
             return False
             
-        # Vérifier que le code n'est pas expiré
+        # VÃ©rifier que le code n'est pas expirÃ©
         expiry_time = created_at + timedelta(minutes=VerificationService.CODE_EXPIRY_MINUTES)
         if timezone.now() > expiry_time:
             return False
             
-        # Vérifier que le code correspond
+        # VÃ©rifier que le code correspond
         return code == stored_code
     
     @staticmethod
     def activate_user(user, verification_code, stored_code, code_created_at):
         """Active un compte utilisateur si le code est valide"""
         if not VerificationService.is_code_valid(verification_code, stored_code, code_created_at):
-            return False, "Code de vérification invalide ou expiré"
+            return False, "Code de vÃ©rification invalide ou expirÃ©"
             
         user.is_active = True
         user.is_verified = True
         user.save(update_fields=['is_active', 'is_verified'])
         
-        logger.info(f"Compte activé avec succès pour l'utilisateur {user.email}")
-        return True, "Compte activé avec succès"
+        logger.info(f"Compte activÃ© avec succÃ¨s pour l'utilisateur {user.email}")
+        return True, "Compte activÃ© avec succÃ¨s"
 
 class RegistrationService:
     """Service de gestion des inscriptions utilisateur"""
@@ -57,10 +58,10 @@ class RegistrationService:
     def register_company(data):
         """Inscrit une nouvelle entreprise"""
         try:
-            # Création de l'utilisateur
+            # CrÃ©ation de l'utilisateur
             user_data = {
                 'email': data.get('email'),
-                'password': data.get('password'),
+                'password': data.get('password1'),  # Utiliser password1 au lieu de password
                 'first_name': data.get('first_name'),
                 'last_name': data.get('last_name'),
                 'phone_number': data.get('phone_number'),
@@ -69,7 +70,7 @@ class RegistrationService:
             
             user = User.objects.create_user(**user_data)
             
-            # Création du profil entreprise
+            # CrÃ©ation du profil entreprise
             company_data = {
                 'user': user,
                 'company_name': data.get('company_name'),
@@ -78,14 +79,14 @@ class RegistrationService:
                 'address': data.get('address'),
                 'city': data.get('city'),
                 'postal_code': data.get('postal_code'),
-                'country': data.get('country', 'Bénin'),
+                'country': data.get('country', 'BÃ©nin'),
                 'user_position': data.get('user_position'),
                 'accounting_system': data.get('accounting_system'),
             }
             
             CompanyProfile.objects.create(**company_data)
             
-            logger.info(f"Entreprise inscrite avec succès: {data.get('company_name')}")
+            logger.info(f"Entreprise inscrite avec succÃ¨s: {data.get('company_name')}")
             return user, None
         
         except Exception as e:
@@ -99,10 +100,10 @@ class RegistrationService:
     def register_accountant(data):
         """Inscrit un nouvel expert-comptable"""
         try:
-            # Création de l'utilisateur
+            # CrÃ©ation de l'utilisateur
             user_data = {
                 'email': data.get('email'),
-                'password': data.get('password'),
+                'password': data.get('password1'),  # Utiliser password1 au lieu de password
                 'first_name': data.get('first_name'),
                 'last_name': data.get('last_name'),
                 'phone_number': data.get('phone_number'),
@@ -111,7 +112,7 @@ class RegistrationService:
             
             user = User.objects.create_user(**user_data)
             
-            # Création du profil expert-comptable
+            # CrÃ©ation du profil expert-comptable
             accountant_data = {
                 'user': user,
                 'firm_name': data.get('firm_name'),
@@ -119,7 +120,7 @@ class RegistrationService:
                 'address': data.get('address'),
                 'city': data.get('city'),
                 'postal_code': data.get('postal_code'),
-                'country': data.get('country', 'Bénin'),
+                'country': data.get('country', 'BÃ©nin'),
                 'syscohada_certified': data.get('syscohada_certified', False),
                 'sysbenyl_certified': data.get('sysbenyl_certified', False),
                 'minimal_certified': data.get('minimal_certified', False),
@@ -127,12 +128,12 @@ class RegistrationService:
             
             AccountantProfile.objects.create(**accountant_data)
             
-            # Activer MFA par défaut pour les experts-comptables
+            # Activer MFA par dÃ©faut pour les experts-comptables
             if user.user_type == UserType.ACCOUNTANT:
                 user.mfa_enabled = True
                 user.save(update_fields=['mfa_enabled'])
             
-            logger.info(f"Expert-comptable inscrit avec succès: {data.get('firm_name')}")
+            logger.info(f"Expert-comptable inscrit avec succÃ¨s: {data.get('firm_name')}")
             return user, None
         
         except Exception as e:
@@ -157,21 +158,21 @@ class AuthenticationService:
             logger.warning(f"Tentative de connexion avec un email inexistant: {email}")
             return None, "Identifiants invalides"
         
-        # Vérifier si le compte est verrouillé
+        # VÃ©rifier si le compte est verrouillÃ©
         if user.is_locked():
-            logger.warning(f"Tentative de connexion sur un compte verrouillé: {email}")
-            return None, "Ce compte est temporairement verrouillé. Veuillez réessayer plus tard ou utilisez le lien de déblocage envoyé par email."
+            logger.warning(f"Tentative de connexion sur un compte verrouillÃ©: {email}")
+            return None, "Ce compte est temporairement verrouillÃ©. Veuillez rÃ©essayer plus tard ou utilisez le lien de dÃ©blocage envoyÃ© par email."
         
-        # Vérifier si le compte est activé
+        # VÃ©rifier si le compte est activÃ©
         if not user.is_active:
-            logger.warning(f"Tentative de connexion sur un compte non activé: {email}")
-            return None, "Ce compte n'est pas activé. Veuillez vérifier votre email pour activer votre compte."
+            logger.warning(f"Tentative de connexion sur un compte non activÃ©: {email}")
+            return None, "Ce compte n'est pas activÃ©. Veuillez vÃ©rifier votre email pour activer votre compte."
         
         # Authentifier l'utilisateur
         user = authenticate(request=request, username=email, password=password)
         
         if user is None:
-            # Enregistrer la tentative échouée
+            # Enregistrer la tentative Ã©chouÃ©e
             found_user = User.objects.get(email=email)
             found_user.record_login_attempt(
                 success=False, 
@@ -182,10 +183,10 @@ class AuthenticationService:
                 }
             )
             
-            # Message d'erreur générique pour des raisons de sécurité
+            # Message d'erreur gÃ©nÃ©rique pour des raisons de sÃ©curitÃ©
             return None, "Identifiants invalides"
         
-        # Connexion réussie
+        # Connexion rÃ©ussie
         device_info = {
             'user_agent': user_agent,
             'timestamp': timezone.now().isoformat()
@@ -197,30 +198,30 @@ class AuthenticationService:
             device_info=device_info
         )
         
-        # Gérer la session selon l'option "se souvenir de moi"
+        # GÃ©rer la session selon l'option "se souvenir de moi"
         if remember:
             # Session de 2 semaines
             request.session.set_expiry(1209600)
         else:
-            # Session qui expire à la fermeture du navigateur
+            # Session qui expire Ã  la fermeture du navigateur
             request.session.set_expiry(0)
         
-        logger.info(f"Connexion réussie pour l'utilisateur {user.email}")
+        logger.info(f"Connexion rÃ©ussie pour l'utilisateur {user.email}")
         return user, None
     
     @staticmethod
     def is_unusual_login(user, request):
-        """Détecte si la connexion provient d'un appareil ou d'une localisation inhabituelle"""
+        """DÃ©tecte si la connexion provient d'un appareil ou d'une localisation inhabituelle"""
         ip_address = request.META.get('REMOTE_ADDR')
         user_agent = request.META.get('HTTP_USER_AGENT', '')
         
-        # Vérifier si l'adresse IP est connue
+        # VÃ©rifier si l'adresse IP est connue
         known_ips = [entry.get('ip_address') for entry in user.login_history if entry.get('success', False)]
         if ip_address not in known_ips:
             logger.info(f"Connexion depuis une IP inhabituelle pour {user.email}: {ip_address}")
             return True
         
-        # Vérifier si l'appareil est connu
+        # VÃ©rifier si l'appareil est connu
         for device in user.known_devices:
             if device.get('user_agent') == user_agent:
                 return False
@@ -230,12 +231,12 @@ class AuthenticationService:
     
     @staticmethod
     def logout(request, user):
-        """Déconnecte un utilisateur et enregistre l'événement"""
+        """DÃ©connecte un utilisateur et enregistre l'Ã©vÃ©nement"""
         if user and user.is_authenticated:
             ip_address = request.META.get('REMOTE_ADDR')
             timestamp = timezone.now()
             
-            # Enregistrer la déconnexion dans l'historique
+            # Enregistrer la dÃ©connexion dans l'historique
             logout_entry = {
                 'timestamp': timestamp.isoformat(),
                 'ip_address': ip_address,
@@ -243,11 +244,11 @@ class AuthenticationService:
                 'success': True
             }
             
-            # Mettre à jour l'historique
+            # Mettre Ã  jour l'historique
             user.login_history = [logout_entry] + user.login_history[:9]
             user.save(update_fields=['login_history'])
             
-            logger.info(f"Déconnexion réussie pour l'utilisateur {user.email}")
+            logger.info(f"DÃ©connexion rÃ©ussie pour l'utilisateur {user.email}")
             
         # Effacer la session
         request.session.flush()

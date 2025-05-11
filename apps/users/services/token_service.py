@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import jwt
 import uuid
 import logging
@@ -13,16 +14,16 @@ from ..models import User
 logger = logging.getLogger(__name__)
 
 class TokenService:
-    """Service de gestion des tokens pour l'authentification API et les processus de sécurité"""
+    """Service de gestion des tokens pour l'authentification API et les processus de sÃ©curitÃ©"""
     
     @staticmethod
     def generate_jwt_token(user):
-        """Génère un token JWT pour l'authentification API"""
+        """GÃ©nÃ¨re un token JWT pour l'authentification API"""
         payload = {
             'user_id': str(user.id),
             'email': user.email,
             'user_type': user.user_type,
-            'exp': datetime.utcnow() + timedelta(days=1),  # Expiration après 1 jour
+            'exp': datetime.utcnow() + timedelta(days=1),  # Expiration aprÃ¨s 1 jour
             'iat': datetime.utcnow(),
             'jti': str(uuid.uuid4())  # JWT ID unique
         }
@@ -33,7 +34,7 @@ class TokenService:
             algorithm='HS256'
         )
         
-        logger.info(f"Token JWT généré pour l'utilisateur {user.email}")
+        logger.info(f"Token JWT gÃ©nÃ©rÃ© pour l'utilisateur {user.email}")
         return token
     
     @staticmethod
@@ -56,86 +57,102 @@ class TokenService:
             return user
             
         except jwt.ExpiredSignatureError:
-            logger.warning("Token JWT expiré")
+            logger.warning("Token JWT expirÃ©")
             return None
         except (jwt.InvalidTokenError, User.DoesNotExist):
             logger.warning("Token JWT invalide")
             return None
 
 class VerificationCodeService:
-    """Service de gestion des codes de vérification pour l'activation de compte"""
+    """Service de gestion des codes de vÃ©rification pour l'activation de compte"""
     
     @staticmethod
     def send_verification_code(user, code):
-        """Envoie un email contenant le code de vérification"""
-        subject = "Normx-AI - Vérification de votre compte"
+        """Envoie un email contenant le code de vÃ©rification"""
+        from datetime import datetime
+
+        current_year = datetime.now().year
+
+        subject = "Normx-AI - VÃ©rification de votre compte"
         message = f"""
         Bonjour {user.get_full_name()},
-        
-        Votre code de vérification pour activer votre compte Normx-AI est : {code}
-        
+
+        Votre code de vÃ©rification pour activer votre compte Normx-AI est : {code}
+
         Ce code est valable pendant 30 minutes.
-        
-        Si vous n'avez pas créé de compte sur Normx-AI, veuillez ignorer cet email.
-        
-        L'équipe Normx-AI
+
+        Si vous n'avez pas crÃ©Ã© de compte sur Normx-AI, veuillez ignorer cet email.
+
+        L'Ã©quipe Normx-AI
         """
-        
+
+        # Message HTML pour les clients qui supportent HTML
         html_message = render_to_string('users/emails/verification_code.html', {
             'user': user,
-            'code': code,
-            'expiry_minutes': 30
+            'verification_code': code,  # Notez le changement de nom de variable pour correspondre au template
+            'current_year': current_year
         })
-        
+
+        # Message texte pour les clients qui ne supportent pas HTML
+        text_message = render_to_string('users/emails/verification_code_text.html', {
+            'user': user,
+            'verification_code': code,
+            'current_year': current_year
+        })
+
         try:
             send_mail(
                 subject=subject,
-                message=message,
+                message=text_message,  # Utiliser le template texte ici
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=[user.email],
                 html_message=html_message,
                 fail_silently=False
             )
-            logger.info(f"Code de vérification envoyé à {user.email}")
+            logger.info(f"Code de vÃ©rification envoyÃ© Ã  {user.email}")
             return True
         except Exception as e:
-            logger.error(f"Échec de l'envoi du code de vérification à {user.email}: {str(e)}")
+            logger.error(f"Ã‰chec de l'envoi du code de vÃ©rification Ã  {user.email}: {str(e)}")
             return False
 
 class PasswordResetService:
-    """Service de gestion des réinitialisations de mot de passe"""
+    """Service de gestion des rÃ©initialisations de mot de passe"""
     
     token_generator = PasswordResetTokenGenerator()
     
     @staticmethod
     def send_password_reset_link(user):
-        """Envoie un email contenant le lien de réinitialisation de mot de passe"""
+        """Envoie un email contenant le lien de rÃ©initialisation de mot de passe"""
+        from datetime import datetime
+
+        current_year = datetime.now().year
         token = PasswordResetService.token_generator.make_token(user)
-        
-        # Dans un contexte réel, vous utiliseriez une URL de front-end
-        reset_url = f"{settings.SITE_URL}/reset-password/{user.id}/{token}/"
-        
-        subject = "Normx-AI - Réinitialisation de votre mot de passe"
+
+        # Dans un contexte rÃ©el, vous utiliseriez une URL de front-end
+        reset_url = f"{settings.SITE_URL}/users/password-reset/{user.id}/{token}/"
+
+        subject = "Normx-AI - RÃ©initialisation de votre mot de passe"
         message = f"""
         Bonjour {user.get_full_name()},
-        
-        Vous avez demandé la réinitialisation de votre mot de passe sur Normx-AI.
-        
-        Pour définir un nouveau mot de passe, veuillez cliquer sur le lien suivant :
+
+        Vous avez demandÃ© la rÃ©initialisation de votre mot de passe sur Normx-AI.
+
+        Pour dÃ©finir un nouveau mot de passe, veuillez cliquer sur le lien suivant :
         {reset_url}
-        
+
         Ce lien est valable pendant 24 heures.
-        
-        Si vous n'avez pas demandé de réinitialisation de mot de passe, veuillez ignorer cet email.
-        
-        L'équipe Normx-AI
+
+        Si vous n'avez pas demandÃ© de rÃ©initialisation de mot de passe, veuillez ignorer cet email.
+
+        L'Ã©quipe Normx-AI
         """
-        
+
         html_message = render_to_string('users/emails/password_reset.html', {
             'user': user,
-            'reset_url': reset_url
+            'reset_url': reset_url,
+            'current_year': current_year
         })
-        
+
         try:
             send_mail(
                 subject=subject,
@@ -145,44 +162,48 @@ class PasswordResetService:
                 html_message=html_message,
                 fail_silently=False
             )
-            logger.info(f"Lien de réinitialisation de mot de passe envoyé à {user.email}")
+            logger.info(f"Lien de rÃ©initialisation de mot de passe envoyÃ© Ã  {user.email}")
             return True
         except Exception as e:
-            logger.error(f"Échec de l'envoi du lien de réinitialisation à {user.email}: {str(e)}")
+            logger.error(f"Ã‰chec de l'envoi du lien de rÃ©initialisation Ã  {user.email}: {str(e)}")
             return False
     
     @staticmethod
     def validate_password_reset_token(user, token):
-        """Valide un token de réinitialisation de mot de passe"""
+        """Valide un token de rÃ©initialisation de mot de passe"""
         return PasswordResetService.token_generator.check_token(user, token)
     
     @staticmethod
     def send_account_locked_notification(user):
-        """Envoie un email de notification lorsqu'un compte est verrouillé"""
+        """Envoie un email de notification lorsqu'un compte est verrouillÃ©"""
+        from datetime import datetime
+
+        current_year = datetime.now().year
         token = PasswordResetService.token_generator.make_token(user)
-        
-        # URL pour débloquer le compte
-        unlock_url = f"{settings.SITE_URL}/unlock-account/{user.id}/{token}/"
-        
-        subject = "Normx-AI - Votre compte a été temporairement verrouillé"
+
+        # URL pour dÃ©bloquer le compte
+        unlock_url = f"{settings.SITE_URL}/users/unlock-account/{user.id}/{token}/"
+
+        subject = "Normx-AI - Votre compte a Ã©tÃ© temporairement verrouillÃ©"
         message = f"""
         Bonjour {user.get_full_name()},
-        
-        Votre compte Normx-AI a été temporairement verrouillé suite à plusieurs tentatives de connexion échouées.
-        
-        Si c'était vous, vous pouvez débloquer votre compte immédiatement en cliquant sur le lien suivant :
+
+        Votre compte Normx-AI a Ã©tÃ© temporairement verrouillÃ© suite Ã  plusieurs tentatives de connexion Ã©chouÃ©es.
+
+        Si c'Ã©tait vous, vous pouvez dÃ©bloquer votre compte immÃ©diatement en cliquant sur le lien suivant :
         {unlock_url}
-        
-        Si ce n'était pas vous, quelqu'un a peut-être essayé d'accéder à votre compte. Pour plus de sécurité, nous vous recommandons de changer votre mot de passe après avoir débloqué votre compte.
-        
-        L'équipe Normx-AI
+
+        Si ce n'Ã©tait pas vous, quelqu'un a peut-Ãªtre essayÃ© d'accÃ©der Ã  votre compte. Pour plus de sÃ©curitÃ©, nous vous recommandons de changer votre mot de passe aprÃ¨s avoir dÃ©bloquÃ© votre compte.
+
+        L'Ã©quipe Normx-AI
         """
-        
+
         html_message = render_to_string('users/emails/account_locked.html', {
             'user': user,
-            'unlock_url': unlock_url
+            'unlock_url': unlock_url,
+            'current_year': current_year
         })
-        
+
         try:
             send_mail(
                 subject=subject,
@@ -192,8 +213,8 @@ class PasswordResetService:
                 html_message=html_message,
                 fail_silently=False
             )
-            logger.info(f"Notification de verrouillage de compte envoyée à {user.email}")
+            logger.info(f"Notification de verrouillage de compte envoyÃ©e Ã  {user.email}")
             return True
         except Exception as e:
-            logger.error(f"Échec de l'envoi de la notification de verrouillage à {user.email}: {str(e)}")
+            logger.error(f"Ã‰chec de l'envoi de la notification de verrouillage Ã  {user.email}: {str(e)}")
             return False

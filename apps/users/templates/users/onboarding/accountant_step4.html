@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %}Modèles de documents | Étape 4{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Modèles de documents (Étape 4/{{ total_steps }})</h4>
+                </div>
+                <div class="card-body">
+                    <div class="progress mb-4">
+                        <div class="progress-bar" role="progressbar" style="width: {{ progress_percent }}%;" aria-valuenow="{{ progress_percent }}" aria-valuemin="0" aria-valuemax="100">{{ progress_percent }}%</div>
+                    </div>
+                    
+                    <h4 class="mb-4">Configuration des modèles de documents</h4>
+                    
+                    <p>Personnalisez les modèles de documents que vous utiliserez pour vos clients.</p>
+                    
+                    <div class="alert alert-info mb-4">
+                        <p>Nous avons préparé des modèles standards conformes à la réglementation OHADA. Vous pouvez les utiliser tels quels ou les personnaliser selon vos besoins.</p>
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <h5 class="mb-3">États financiers</h5>
+                        <div class="table-responsive mb-4">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Document</th>
+                                        <th>Modèle</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Bilan</td>
+                                        <td>Standard OHADA</td>
+                                        <td>
+                                            <button type="button" class="btn btn-outline-primary btn-sm">
+                                                <i class="bi bi-eye"></i> Prévisualiser
+                                            </button>
+                                            <button type="button" class="btn btn-outline-secondary btn-sm">
+                                                <i class="bi bi-pencil"></i> Personnaliser
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Compte de résultat</td>
+                                        <td>Standard OHADA</td>
+                                        <td>
+                                            <button type="button" class="btn btn-outline-primary btn-sm">
+                                                <i class="bi bi-eye"></i> Prévisualiser
+                                            </button>
+                                            <button type="button" class="btn btn-outline-secondary btn-sm">
+                                                <i class="bi bi-pencil"></i> Personnaliser
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tableau des flux de trésorerie</td>
+                                        <td>Standard OHADA</td>
+                                        <td>
+                                            <button type="button" class="btn btn-outline-primary btn-sm">
+                                                <i class="bi bi-eye"></i> Prévisualiser
+                                            </button>
+                                            <button type="button" class="btn btn-outline-secondary btn-sm">
+                                                <i class="bi bi-pencil"></i> Personnaliser
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <h5 class="mb-3">Documents de gestion</h5>
+                        <div class="table-responsive mb-4">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Document</th>
+                                        <th>Modèle</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Grand livre</td>
+                                        <td>Standard</td>
+                                        <td>
+                                            <button type="button" class="btn btn-outline-primary btn-sm">
+                                                <i class="bi bi-eye"></i> Prévisualiser
+                                            </button>
+                                            <button type="button" class="btn btn-outline-secondary btn-sm">
+                                                <i class="bi bi-pencil"></i> Personnaliser
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Balance générale</td>
+                                        <td>Standard</td>
+                                        <td>
+                                            <button type="button" class="btn btn-outline-primary btn-sm">
+                                                <i class="bi bi-eye"></i> Prévisualiser
+                                            </button>
+                                            <button type="button" class="btn btn-outline-secondary btn-sm">
+                                                <i class="bi bi-pencil"></i> Personnaliser
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Journal</td>
+                                        <td>Standard</td>
+                                        <td>
+                                            <button type="button" class="btn btn-outline-primary btn-sm">
+                                                <i class="bi bi-eye"></i> Prévisualiser
+                                            </button>
+                                            <button type="button" class="btn btn-outline-secondary btn-sm">
+                                                <i class="bi bi-pencil"></i> Personnaliser
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="use_defaults" name="use_defaults" checked>
+                            <label class="form-check-label" for="use_defaults">Utiliser les modèles par défaut</label>
+                        </div>
+                        
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="customize_later" name="customize_later">
+                            <label class="form-check-label" for="customize_later">Je personnaliserai mes modèles plus tard</label>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            {% if current_step > 1 %}
+                            <button type="submit" name="action" value="previous" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Précédent
+                            </button>
+                            {% else %}
+                            <div></div> <!-- Espace vide pour maintenir l'alignement -->
+                            {% endif %}
+
+                            <button type="submit" name="action" value="next" class="btn btn-primary">
+                                Continuer<i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

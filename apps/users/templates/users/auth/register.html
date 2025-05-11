@@ -1,0 +1,616 @@
+{% extends "base.html" %}
+
+{% block title %}Inscription {{ user_type_display }} | Normx-AI{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-7 col-xl-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-primary text-white py-3">
+                <h4 class="mb-0 fw-bold">Inscription {{ user_type_display }}</h4>
+            </div>
+            <div class="card-body p-4">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger mb-4">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            <div>
+                                {% for error in form.non_field_errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mb-4">
+                        <div class="section-title d-flex align-items-center mb-3">
+                            <i class="fas fa-shield-alt text-primary me-2"></i>
+                            <h5 class="fw-bold mb-0">Informations d'authentification</h5>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.email.id_for_label }}" class="form-label">{{ form.email.label }}*</label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                            <div class="invalid-feedback d-block">
+                                <i class="fas fa-exclamation-circle me-1"></i>
+                                {% for error in form.email.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            {% if form.email.help_text %}
+                            <div class="form-text mt-1">{{ form.email.help_text }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.password1.id_for_label }}" class="form-label">{{ form.password1.label }}*</label>
+                                <div class="input-group">
+                                    {{ form.password1 }}
+                                    <button class="btn btn-outline-secondary password-toggle" type="button">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                {% if form.password1.errors %}
+                                <div class="invalid-feedback d-block">
+                                    <i class="fas fa-exclamation-circle me-1"></i>
+                                    {% for error in form.password1.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                                {% if form.password1.help_text %}
+                                <div class="form-text mt-1">{{ form.password1.help_text }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.password2.id_for_label }}" class="form-label">{{ form.password2.label }}*</label>
+                                <div class="input-group">
+                                    {{ form.password2 }}
+                                    <button class="btn btn-outline-secondary password-toggle" type="button">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                {% if form.password2.errors %}
+                                <div class="invalid-feedback d-block">
+                                    <i class="fas fa-exclamation-circle me-1"></i>
+                                    {% for error in form.password2.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <div class="section-title d-flex align-items-center mb-3">
+                            <i class="fas fa-user text-primary me-2"></i>
+                            <h5 class="fw-bold mb-0">Informations personnelles</h5>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.first_name.id_for_label }}" class="form-label">{{ form.first_name.label }}*</label>
+                                {{ form.first_name }}
+                                {% if form.first_name.errors %}
+                                <div class="invalid-feedback d-block">
+                                    <i class="fas fa-exclamation-circle me-1"></i>
+                                    {% for error in form.first_name.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.last_name.id_for_label }}" class="form-label">{{ form.last_name.label }}*</label>
+                                {{ form.last_name }}
+                                {% if form.last_name.errors %}
+                                <div class="invalid-feedback d-block">
+                                    <i class="fas fa-exclamation-circle me-1"></i>
+                                    {% for error in form.last_name.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.phone_number.id_for_label }}" class="form-label">{{ form.phone_number.label }}*</label>
+                                {{ form.phone_number }}
+                                {% if form.phone_number.errors %}
+                                <div class="invalid-feedback d-block">
+                                    <i class="fas fa-exclamation-circle me-1"></i>
+                                    {% for error in form.phone_number.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            {% if user_type == 'COMPANY' %}
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.user_position.id_for_label }}" class="form-label">{{ form.user_position.label }}*</label>
+                                {{ form.user_position }}
+                                {% if form.user_position.errors %}
+                                <div class="invalid-feedback d-block">
+                                    <i class="fas fa-exclamation-circle me-1"></i>
+                                    {% for error in form.user_position.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    {% if user_type == 'COMPANY' %}
+                    <div class="mb-4">
+                        <div class="section-title d-flex align-items-center mb-3">
+                            <i class="fas fa-building text-primary me-2"></i>
+                            <h5 class="fw-bold mb-0">Informations de l'entreprise</h5>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.company_name.id_for_label }}" class="form-label">{{ form.company_name.label }}*</label>
+                                {{ form.company_name }}
+                                {% if form.company_name.errors %}
+                                <div class="invalid-feedback d-block">
+                                    <i class="fas fa-exclamation-circle me-1"></i>
+                                    {% for error in form.company_name.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.legal_form.id_for_label }}" class="form-label">{{ form.legal_form.label }}*</label>
+                                {{ form.legal_form }}
+                                {% if form.legal_form.errors %}
+                                <div class="invalid-feedback d-block">
+                                    <i class="fas fa-exclamation-circle me-1"></i>
+                                    {% for error in form.legal_form.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.tax_id.id_for_label }}" class="form-label">{{ form.tax_id.label }}*</label>
+                                {{ form.tax_id }}
+                                {% if form.tax_id.errors %}
+                                <div class="invalid-feedback d-block">
+                                    <i class="fas fa-exclamation-circle me-1"></i>
+                                    {% for error in form.tax_id.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.accounting_system.id_for_label }}" class="form-label">{{ form.accounting_system.label }}*</label>
+                                {{ form.accounting_system }}
+                                {% if form.accounting_system.errors %}
+                                <div class="invalid-feedback d-block">
+                                    <i class="fas fa-exclamation-circle me-1"></i>
+                                    {% for error in form.accounting_system.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-12 mb-3">
+                                <label for="{{ form.address.id_for_label }}" class="form-label">{{ form.address.label }}*</label>
+                                {{ form.address }}
+                                {% if form.address.errors %}
+                                <div class="invalid-feedback d-block">
+                                    <i class="fas fa-exclamation-circle me-1"></i>
+                                    {% for error in form.address.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.city.id_for_label }}" class="form-label">{{ form.city.label }}*</label>
+                                {{ form.city }}
+                                {% if form.city.errors %}
+                                <div class="invalid-feedback d-block">
+                                    <i class="fas fa-exclamation-circle me-1"></i>
+                                    {% for error in form.city.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.postal_code.id_for_label }}" class="form-label">{{ form.postal_code.label }}*</label>
+                                {{ form.postal_code }}
+                                {% if form.postal_code.errors %}
+                                <div class="invalid-feedback d-block">
+                                    <i class="fas fa-exclamation-circle me-1"></i>
+                                    {% for error in form.postal_code.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.country.id_for_label }}" class="form-label">{{ form.country.label }}*</label>
+                                {{ form.country }}
+                                {% if form.country.errors %}
+                                <div class="invalid-feedback d-block">
+                                    <i class="fas fa-exclamation-circle me-1"></i>
+                                    {% for error in form.country.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if user_type == 'ACCOUNTANT' %}
+                    <div class="mb-4">
+                        <div class="section-title d-flex align-items-center mb-3">
+                            <i class="fas fa-briefcase text-primary me-2"></i>
+                            <h5 class="fw-bold mb-0">Informations du cabinet</h5>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.firm_name.id_for_label }}" class="form-label">{{ form.firm_name.label }}*</label>
+                                {{ form.firm_name }}
+                                {% if form.firm_name.errors %}
+                                <div class="invalid-feedback d-block">
+                                    <i class="fas fa-exclamation-circle me-1"></i>
+                                    {% for error in form.firm_name.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.professional_id.id_for_label }}" class="form-label">{{ form.professional_id.label }}*</label>
+                                {{ form.professional_id }}
+                                {% if form.professional_id.errors %}
+                                <div class="invalid-feedback d-block">
+                                    <i class="fas fa-exclamation-circle me-1"></i>
+                                    {% for error in form.professional_id.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-12 mb-3">
+                                <label for="{{ form.address.id_for_label }}" class="form-label">{{ form.address.label }}*</label>
+                                {{ form.address }}
+                                {% if form.address.errors %}
+                                <div class="invalid-feedback d-block">
+                                    <i class="fas fa-exclamation-circle me-1"></i>
+                                    {% for error in form.address.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.city.id_for_label }}" class="form-label">{{ form.city.label }}*</label>
+                                {{ form.city }}
+                                {% if form.city.errors %}
+                                <div class="invalid-feedback d-block">
+                                    <i class="fas fa-exclamation-circle me-1"></i>
+                                    {% for error in form.city.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.postal_code.id_for_label }}" class="form-label">{{ form.postal_code.label }}*</label>
+                                {{ form.postal_code }}
+                                {% if form.postal_code.errors %}
+                                <div class="invalid-feedback d-block">
+                                    <i class="fas fa-exclamation-circle me-1"></i>
+                                    {% for error in form.postal_code.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.country.id_for_label }}" class="form-label">{{ form.country.label }}*</label>
+                                {{ form.country }}
+                                {% if form.country.errors %}
+                                <div class="invalid-feedback d-block">
+                                    <i class="fas fa-exclamation-circle me-1"></i>
+                                    {% for error in form.country.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <div class="section-title d-flex align-items-center mb-3">
+                            <i class="fas fa-certificate text-primary me-2"></i>
+                            <h5 class="fw-bold mb-0">Compétences et certifications</h5>
+                        </div>
+                        
+                        <div class="certifications-container">
+                            <div class="form-check mb-2">
+                                {{ form.syscohada_certified }}
+                                <label class="form-check-label" for="{{ form.syscohada_certified.id_for_label }}">
+                                    {{ form.syscohada_certified.label }}
+                                </label>
+                            </div>
+                            
+                            <div class="form-check mb-2">
+                                {{ form.sysbenyl_certified }}
+                                <label class="form-check-label" for="{{ form.sysbenyl_certified.id_for_label }}">
+                                    {{ form.sysbenyl_certified.label }}
+                                </label>
+                            </div>
+                            
+                            <div class="form-check mb-2">
+                                {{ form.minimal_certified }}
+                                <label class="form-check-label" for="{{ form.minimal_certified.id_for_label }}">
+                                    {{ form.minimal_certified.label }}
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mb-4">
+                        <div class="form-check">
+                            {{ form.terms_accepted }}
+                            <label class="form-check-label" for="{{ form.terms_accepted.id_for_label }}">
+                                {{ form.terms_accepted.label }}
+                            </label>
+                            {% if form.terms_accepted.errors %}
+                            <div class="invalid-feedback d-block">
+                                <i class="fas fa-exclamation-circle me-1"></i>
+                                {% for error in form.terms_accepted.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary py-2 fw-bold">
+                            <i class="fas fa-user-plus me-2"></i>S'inscrire
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer bg-white text-center py-3">
+                <p class="mb-0">Déjà inscrit? <a href="{% url 'login' %}" class="text-primary text-decoration-none fw-bold">Se connecter</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .card-header {
+        border-bottom: none;
+    }
+    
+    /* Style des champs sans bordures */
+    .form-control, .form-select {
+        height: 45px;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        padding: 0.5rem 0.75rem;
+        font-size: 1rem;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.15);
+    }
+    
+    textarea.form-control {
+        height: auto;
+        min-height: 100px;
+    }
+    
+    /* En-têtes de section */
+    .section-title {
+        margin-bottom: 1.25rem;
+    }
+    
+    .section-title i {
+        font-size: 1.25rem;
+    }
+    
+    h5 {
+        color: var(--text-dark);
+        font-family: 'Montserrat', sans-serif;
+        font-size: 1.1rem;
+    }
+    
+    /* Validations d'erreur */
+    .invalid-feedback {
+        color: var(--danger-color);
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+    }
+    
+    /* Boutons */
+    .btn-primary {
+        border-radius: 4px;
+        transition: all 0.3s;
+    }
+    
+    .btn-primary:hover {
+        box-shadow: 0 5px 15px rgba(37, 99, 235, 0.2);
+    }
+    
+    /* Style pour le bouton de visibilité du mot de passe */
+    .password-toggle {
+        border-color: #dee2e6;
+        background-color: #f8f9fa;
+    }
+    
+    .password-toggle:hover {
+        background-color: #e9ecef;
+        color: var(--primary-color);
+    }
+    
+    /* Cases à cocher */
+    .form-check-input {
+        width: 1.1em;
+        height: 1.1em;
+        margin-top: 0.25em;
+        background-color: #fff;
+        border: 1px solid #adb5bd;
+    }
+    
+    .form-check-input:checked {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+    
+    .form-check-label {
+        margin-left: 0.2rem;
+    }
+    
+    /* Aide textuelle */
+    .form-text {
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Ajouter les classes aux champs du formulaire
+        const formControls = document.querySelectorAll('input[type="text"], input[type="email"], input[type="password"], textarea');
+        formControls.forEach(function(control) {
+            control.classList.add('form-control');
+            
+            // Ajouter des placeholders par type de champ
+            if (control.id.includes('email')) {
+                control.setAttribute('placeholder', 'exemple@domaine.com');
+            }
+            if (control.id.includes('password')) {
+                control.setAttribute('placeholder', '••••••••••');
+            }
+            if (control.id.includes('first_name')) {
+                control.setAttribute('placeholder', 'Prénom');
+            }
+            if (control.id.includes('last_name')) {
+                control.setAttribute('placeholder', 'Nom');
+            }
+            if (control.id.includes('phone')) {
+                control.setAttribute('placeholder', 'Ex: +33612345678');
+            }
+            if (control.id.includes('address')) {
+                control.setAttribute('placeholder', 'Adresse complète');
+            }
+            if (control.id.includes('city')) {
+                control.setAttribute('placeholder', 'Ville');
+            }
+            if (control.id.includes('postal_code')) {
+                control.setAttribute('placeholder', 'Code postal');
+            }
+        });
+
+        const selects = document.querySelectorAll('select');
+        selects.forEach(function(select) {
+            select.classList.add('form-select');
+        });
+
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(function(checkbox) {
+            checkbox.classList.add('form-check-input');
+        });
+
+        // Gestion des boutons de visibilité du mot de passe
+        const passwordToggles = document.querySelectorAll('.password-toggle');
+        passwordToggles.forEach(function(toggle) {
+            toggle.addEventListener('click', function() {
+                const passwordField = this.closest('.input-group').querySelector('input');
+                const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordField.setAttribute('type', type);
+                
+                // Changer l'icône
+                const icon = this.querySelector('i');
+                if (type === 'text') {
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
+            });
+        });
+
+        // Gestion du CSRF
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                const csrfField = document.querySelector('input[name="csrfmiddlewaretoken"]');
+                const csrfCookie = getCookie('csrftoken');
+                if (csrfField && csrfCookie && csrfField.value !== csrfCookie) {
+                    csrfField.value = csrfCookie;
+                }
+            });
+        }
+
+        // Fonction pour récupérer un cookie par son nom
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    });
+</script>
+{% endblock %}

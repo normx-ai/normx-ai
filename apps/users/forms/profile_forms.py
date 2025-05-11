@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from django import forms
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.forms import PasswordChangeForm
@@ -11,7 +12,7 @@ class UserBasicInfoForm(forms.ModelForm):
         model = User
         fields = ['first_name', 'last_name', 'phone_number']
         widgets = {
-            'first_name': forms.TextInput(attrs={'placeholder': _('Prénom')}),
+            'first_name': forms.TextInput(attrs={'placeholder': _('PrÃ©nom')}),
             'last_name': forms.TextInput(attrs={'placeholder': _('Nom')}),
             'phone_number': forms.TextInput(attrs={'placeholder': _('Ex: +22961234567')}),
         }
@@ -38,7 +39,7 @@ class CompanyProfileForm(forms.ModelForm):
         
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Le numéro d'identification fiscale ne peut pas être modifié après inscription
+        # Le numÃ©ro d'identification fiscale ne peut pas Ãªtre modifiÃ© aprÃ¨s inscription
         if self.instance and self.instance.pk:
             self.fields.pop('tax_id', None)
 
@@ -62,12 +63,12 @@ class AccountantProfileForm(forms.ModelForm):
         
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Le numéro d'agrément professionnel ne peut pas être modifié après inscription
+        # Le numÃ©ro d'agrÃ©ment professionnel ne peut pas Ãªtre modifiÃ© aprÃ¨s inscription
         if self.instance and self.instance.pk:
             self.fields.pop('professional_id', None)
 
 class SecuritySettingsForm(forms.ModelForm):
-    """Formulaire pour les paramètres de sécurité"""
+    """Formulaire pour les paramÃ¨tres de sÃ©curitÃ©"""
     
     class Meta:
         model = User
@@ -80,10 +81,10 @@ class SecuritySettingsForm(forms.ModelForm):
         # MFA obligatoire pour les experts-comptables
         if user and user.user_type == 'ACCOUNTANT':
             self.fields['mfa_enabled'].disabled = True
-            self.fields['mfa_enabled'].help_text = _("L'authentification à deux facteurs est obligatoire pour les comptes experts-comptables.")
+            self.fields['mfa_enabled'].help_text = _("L'authentification Ã  deux facteurs est obligatoire pour les comptes experts-comptables.")
 
 class CustomPasswordChangeForm(PasswordChangeForm):
-    """Formulaire personnalisé de changement de mot de passe"""
+    """Formulaire personnalisÃ© de changement de mot de passe"""
     
     old_password = forms.CharField(
         label=_("Mot de passe actuel"),
@@ -94,7 +95,7 @@ class CustomPasswordChangeForm(PasswordChangeForm):
         label=_("Nouveau mot de passe"),
         strip=False,
         widget=forms.PasswordInput(attrs={'placeholder': _('Nouveau mot de passe')}),
-        help_text=_("Le mot de passe doit comporter au moins 8 caractères et inclure des lettres, chiffres et caractères spéciaux.")
+        help_text=_("Le mot de passe doit comporter au moins 8 caractÃ¨res et inclure des lettres, chiffres et caractÃ¨res spÃ©ciaux.")
     )
     new_password2 = forms.CharField(
         label=_("Confirmation du nouveau mot de passe"),
@@ -103,7 +104,7 @@ class CustomPasswordChangeForm(PasswordChangeForm):
     )
 
 class AccountingSettingsForm(forms.ModelForm):
-    """Formulaire pour les paramètres comptables"""
+    """Formulaire pour les paramÃ¨tres comptables"""
     
     class Meta:
         model = CompanyProfile
@@ -112,5 +113,5 @@ class AccountingSettingsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['accounting_system'].help_text = _(
-            "Attention : Changer de système comptable peut nécessiter une adaptation de vos données existantes."
+            "Attention : Changer de systÃ¨me comptable peut nÃ©cessiter une adaptation de vos donnÃ©es existantes."
         )

@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Plan comptable OHADA | Étape 4{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Plan comptable OHADA (Étape 4/{{ total_steps }})</h4>
+                </div>
+                <div class="card-body">
+                    <div class="progress mb-4">
+                        <div class="progress-bar" role="progressbar" style="width: {{ progress_percent }}%;" aria-valuenow="{{ progress_percent }}" aria-valuemin="0" aria-valuemax="100">{{ progress_percent }}%</div>
+                    </div>
+                    
+                    <h4 class="mb-4">Importation du plan comptable OHADA</h4>
+                    
+                    <p>Le plan comptable OHADA (Système Comptable OHADA) est obligatoire pour les entreprises des États membres de l'OHADA, dont le Bénin fait partie.</p>
+                    
+                    <div class="alert alert-info mb-4">
+                        <h5>Information</h5>
+                        <p>Le plan comptable OHADA sera automatiquement importé dans votre système. Vous pourrez ensuite personnaliser les comptes selon vos besoins.</p>
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="chart_template" class="form-label">Version du plan comptable</label>
+                            <select class="form-select" id="chart_template" name="chart_template" required>
+                                <option value="ohada_standard" selected>SYSCOHADA standard (Entreprises commerciales)</option>
+                                <option value="ohada_minimal">Système minimal de trésorerie (TPE)</option>
+                                <option value="ohada_simplified">SYSCOHADA allégé (PME)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="business_activity" class="form-label">Secteur d'activité principal</label>
+                            <select class="form-select" id="business_activity" name="business_activity" required>
+                                <option value="commerce">Commerce</option>
+                                <option value="service">Service</option>
+                                <option value="industrie">Industrie</option>
+                                <option value="agriculture">Agriculture</option>
+                                <option value="construction">Construction</option>
+                                <option value="autre">Autre</option>
+                            </select>
+                            <small class="text-muted">Cette information nous aidera à adapter votre plan comptable à votre secteur d'activité.</small>
+                        </div>
+                        
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="customize_accounts" name="customize_accounts">
+                            <label class="form-check-label" for="customize_accounts">Personnaliser mon plan comptable après l'importation</label>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            {% if current_step > 1 %}
+                            <button type="submit" name="action" value="previous" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Précédent
+                            </button>
+                            {% else %}
+                            <div></div> <!-- Espace vide pour maintenir l'alignement -->
+                            {% endif %}
+
+                            <button type="submit" name="action" value="next" class="btn btn-primary">
+                                Importer et continuer<i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import logging
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
@@ -8,12 +9,18 @@ from ..models import User, UserType
 
 logger = logging.getLogger(__name__)
 
-@login_required
+@login_required(login_url='/users/login/')
 def dashboard_view(request):
     """Vue du tableau de bord principal"""
+    # Si l'utilisateur n'est pas authentifi√©, le d√©corateur login_required doit rediriger
+    # Mais pour plus de s√©curit√©, faisons une v√©rification suppl√©mentaire
+    if not request.user.is_authenticated:
+        print("WARNING: User not authenticated but reached dashboard view!")
+        return redirect('/users/login/')
+
     user = request.user
     
-    # Rediriger vers l'onboarding si nÈcessaire
+    # Rediriger vers l'onboarding si n√©cessaire
     if user.user_type == UserType.COMPANY:
         profile = getattr(user, 'company_profile', None)
         if profile and not profile.onboarding_completed:
@@ -30,31 +37,35 @@ def dashboard_view(request):
         'profile': profile,
     }
     
-    # Ajouter des donnÈes spÈcifiques au type d'utilisateur
+    # Ajouter des donn√©es sp√©cifiques au type d'utilisateur
     if user.user_type == UserType.COMPANY:
-        # TODO: Ajouter des donnÈes pour le tableau de bord entreprise
+        # TODO: Ajouter des donn√©es pour le tableau de bord entreprise
         # Par exemple:
-        # - Notifications importantes (ÈchÈances fiscales)
-        # - T‚ches en attente
-        # - AccËs aux fonctionnalitÈs les plus utilisÈes
+        # - Notifications importantes (√©ch√©ances fiscales)
+        # - T√¢ches en attente
+        # - Acc√®s aux fonctionnalit√©s les plus utilis√©es
         pass
     else:  # ACCOUNTANT
-        # TODO: Ajouter des donnÈes pour le tableau de bord expert-comptable
+        # TODO: Ajouter des donn√©es pour le tableau de bord expert-comptable
         # Par exemple:
-        # - Liste des clients avec indicateurs d'activitÈ
-        # - T‚ches en attente par client
+        # - Liste des clients avec indicateurs d'activit√©
+        # - T√¢ches en attente par client
         pass
     
     return render(request, template, context)
 
-@login_required
+@login_required(login_url='/users/login/')
 def company_onboarding_view(request):
-    """Vue d'onboarding pour les entreprises (premier accËs)"""
+    """Vue d'onboarding pour les entreprises (premier acc√®s)"""
+    # V√©rification de s√©curit√©
+    if not request.user.is_authenticated:
+        return redirect('/users/login/')
+
     user = request.user
     
-    # VÈrifier que l'utilisateur est bien une entreprise
+    # V√©rifier que l'utilisateur est bien une entreprise
     if user.user_type != UserType.COMPANY:
-        messages.error(request, _("Vous n'avez pas accËs ‡ cette page."))
+        messages.error(request, _("Vous n'avez pas acc√®s √† cette page."))
         return redirect('dashboard')
     
     profile = getattr(user, 'company_profile', None)
@@ -63,41 +74,50 @@ def company_onboarding_view(request):
         messages.error(request, _("Profil entreprise introuvable."))
         return redirect('dashboard')
     
-    # Si l'onboarding est dÈj‡ terminÈ, rediriger vers le tableau de bord
+    # Si l'onboarding est d√©j√† termin√©, rediriger vers le tableau de bord
     if profile.onboarding_completed:
         return redirect('dashboard')
     
-    # GÈrer les Ètapes d'onboarding
+    # G√©rer les √©tapes d'onboarding
     current_step = request.session.get('onboarding_step', 1)
-    total_steps = 6  # Nombre total d'Ètapes
+    total_steps = 6  # Nombre total d'√©tapes
     
     if request.method == 'POST':
-        # TODO: GÈrer les diffÈrentes Ètapes de l'onboarding
-        # …tape 1: Bienvenue et prÈsentation du systËme
-        # …tape 2: Configuration de l'exercice fiscal initial
-        # …tape 3: ParamÈtrage des prÈfÈrences comptables
-        # …tape 4: Importation du plan comptable OHADA
-        # …tape 5: Configuration des journaux comptables
-        # …tape 6: Tutoriel rapide des fonctionnalitÈs principales
-        
-        # Pour cet exemple, on passe simplement ‡ l'Ètape suivante
-        next_step = current_step + 1
-        
-        if next_step > total_steps:
-            # Onboarding terminÈ
-            profile.onboarding_completed = True
-            profile.save(update_fields=['onboarding_completed'])
-            
-            # Nettoyer la session
-            if 'onboarding_step' in request.session:
-                del request.session['onboarding_step']
-            
-            messages.success(request, _("Configuration initiale terminÈe avec succËs!"))
-            return redirect('dashboard')
+        # D√©terminer si l'utilisateur veut avancer ou reculer
+        action = request.POST.get('action', 'next')
+
+        if action == 'previous' and current_step > 1:
+            # Aller √† l'√©tape pr√©c√©dente
+            previous_step = current_step - 1
+            request.session['onboarding_step'] = previous_step
+            current_step = previous_step
         else:
-            # Passer ‡ l'Ètape suivante
-            request.session['onboarding_step'] = next_step
-            current_step = next_step
+            # TODO: G√©rer les diff√©rentes √©tapes de l'onboarding
+            # √âtape 1: Bienvenue et pr√©sentation du syst√®me
+            # √âtape 2: Configuration de l'exercice fiscal initial
+            # √âtape 3: Param√©trage des pr√©f√©rences comptables
+            # √âtape 4: Importation du plan comptable OHADA
+            # √âtape 5: Configuration des journaux comptables
+            # √âtape 6: Tutoriel rapide des fonctionnalit√©s principales
+
+            # Pour cet exemple, on passe simplement √† l'√©tape suivante
+            next_step = current_step + 1
+
+            if next_step > total_steps:
+                # Onboarding termin√©
+                profile.onboarding_completed = True
+                profile.save(update_fields=['onboarding_completed'])
+
+                # Nettoyer la session
+                if 'onboarding_step' in request.session:
+                    del request.session['onboarding_step']
+
+                messages.success(request, _("Configuration initiale termin√©e avec succ√®s!"))
+                return redirect('dashboard')
+            else:
+                # Passer √† l'√©tape suivante
+                request.session['onboarding_step'] = next_step
+                current_step = next_step
     
     context = {
         'current_step': current_step,
@@ -105,19 +125,23 @@ def company_onboarding_view(request):
         'progress_percent': int((current_step / total_steps) * 100),
     }
     
-    # DÈterminer le template ‡ utiliser en fonction de l'Ètape
+    # D√©terminer le template √† utiliser en fonction de l'√©tape
     template = f'users/onboarding/company_step{current_step}.html'
     
     return render(request, template, context)
 
-@login_required
+@login_required(login_url='/users/login/')
 def accountant_onboarding_view(request):
-    """Vue d'onboarding pour les experts-comptables (premier accËs)"""
+    """Vue d'onboarding pour les experts-comptables (premier acc√®s)"""
+    # V√©rification de s√©curit√©
+    if not request.user.is_authenticated:
+        return redirect('/users/login/')
+
     user = request.user
     
-    # VÈrifier que l'utilisateur est bien un expert-comptable
+    # V√©rifier que l'utilisateur est bien un expert-comptable
     if user.user_type != UserType.ACCOUNTANT:
-        messages.error(request, _("Vous n'avez pas accËs ‡ cette page."))
+        messages.error(request, _("Vous n'avez pas acc√®s √† cette page."))
         return redirect('dashboard')
     
     profile = getattr(user, 'accountant_profile', None)
@@ -126,40 +150,49 @@ def accountant_onboarding_view(request):
         messages.error(request, _("Profil expert-comptable introuvable."))
         return redirect('dashboard')
     
-    # Si l'onboarding est dÈj‡ terminÈ, rediriger vers le tableau de bord
+    # Si l'onboarding est d√©j√† termin√©, rediriger vers le tableau de bord
     if profile.onboarding_completed:
         return redirect('dashboard')
     
-    # GÈrer les Ètapes d'onboarding
+    # G√©rer les √©tapes d'onboarding
     current_step = request.session.get('onboarding_step', 1)
-    total_steps = 5  # Nombre total d'Ètapes
+    total_steps = 5  # Nombre total d'√©tapes
     
     if request.method == 'POST':
-        # TODO: GÈrer les diffÈrentes Ètapes de l'onboarding
-        # …tape 1: Bienvenue et prÈsentation du systËme
-        # …tape 2: Configuration du cabinet et des paramËtres par dÈfaut
-        # …tape 3: Options pour ajouter des clients existants
-        # …tape 4: Configuration des modËles de documents
-        # …tape 5: Tutoriel des fonctionnalitÈs spÈcifiques aux experts-comptables
-        
-        # Pour cet exemple, on passe simplement ‡ l'Ètape suivante
-        next_step = current_step + 1
-        
-        if next_step > total_steps:
-            # Onboarding terminÈ
-            profile.onboarding_completed = True
-            profile.save(update_fields=['onboarding_completed'])
-            
-            # Nettoyer la session
-            if 'onboarding_step' in request.session:
-                del request.session['onboarding_step']
-            
-            messages.success(request, _("Configuration initiale terminÈe avec succËs!"))
-            return redirect('dashboard')
+        # D√©terminer si l'utilisateur veut avancer ou reculer
+        action = request.POST.get('action', 'next')
+
+        if action == 'previous' and current_step > 1:
+            # Aller √† l'√©tape pr√©c√©dente
+            previous_step = current_step - 1
+            request.session['onboarding_step'] = previous_step
+            current_step = previous_step
         else:
-            # Passer ‡ l'Ètape suivante
-            request.session['onboarding_step'] = next_step
-            current_step = next_step
+            # TODO: G√©rer les diff√©rentes √©tapes de l'onboarding
+            # √âtape 1: Bienvenue et pr√©sentation du syst√®me
+            # √âtape 2: Configuration du cabinet et des param√®tres par d√©faut
+            # √âtape 3: Options pour ajouter des clients existants
+            # √âtape 4: Configuration des mod√®les de documents
+            # √âtape 5: Tutoriel des fonctionnalit√©s sp√©cifiques aux experts-comptables
+
+            # Pour cet exemple, on passe simplement √† l'√©tape suivante
+            next_step = current_step + 1
+
+            if next_step > total_steps:
+                # Onboarding termin√©
+                profile.onboarding_completed = True
+                profile.save(update_fields=['onboarding_completed'])
+
+                # Nettoyer la session
+                if 'onboarding_step' in request.session:
+                    del request.session['onboarding_step']
+
+                messages.success(request, _("Configuration initiale termin√©e avec succ√®s!"))
+                return redirect('dashboard')
+            else:
+                # Passer √† l'√©tape suivante
+                request.session['onboarding_step'] = next_step
+                current_step = next_step
     
     context = {
         'current_step': current_step,
@@ -167,7 +200,7 @@ def accountant_onboarding_view(request):
         'progress_percent': int((current_step / total_steps) * 100),
     }
     
-    # DÈterminer le template ‡ utiliser en fonction de l'Ètape
+    # D√©terminer le template √† utiliser en fonction de l'√©tape
     template = f'users/onboarding/accountant_step{current_step}.html'
     
     return render(request, template, context)

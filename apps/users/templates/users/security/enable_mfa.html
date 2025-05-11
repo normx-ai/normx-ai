@@ -1,0 +1,199 @@
+{% extends "users/base.html" %}
+
+{% block title %}Activer l'authentification à deux facteurs | {{ block.super }}{% endblock %}
+
+{% block user_content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="mb-3">Activer l'authentification à deux facteurs</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Tableau de bord</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'security_settings' %}">Sécurité</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Activer A2F</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Configuration de l'authentification à deux facteurs</h5>
+                </div>
+                <div class="card-body">
+                    {% if step == 'setup' %}
+                        <div class="alert alert-info">
+                            <h5 class="alert-heading">Sécurisez votre compte</h5>
+                            <p>L'authentification à deux facteurs ajoute une couche supplémentaire de sécurité à votre compte en exigeant un code de vérification en plus de votre mot de passe.</p>
+                        </div>
+
+                        <div class="row align-items-center mb-4">
+                            <div class="col-md-6 text-center mb-3 mb-md-0">
+                                {% if qr_code %}
+                                    <div class="qr-code-container border p-3 d-inline-block">
+                                        <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code" class="img-fluid">
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <h5>Instructions :</h5>
+                                <ol class="mb-3">
+                                    <li class="mb-2">Téléchargez une application d'authentification comme Google Authenticator, Microsoft Authenticator ou Authy sur votre téléphone.</li>
+                                    <li class="mb-2">Scannez le code QR avec votre application d'authentification.</li>
+                                    <li class="mb-2">Entrez le code à 6 chiffres généré par l'application ci-dessous.</li>
+                                </ol>
+                                
+                                {% if secret_key %}
+                                <div class="mb-3">
+                                    <label class="form-label">Code secret (à utiliser si vous ne pouvez pas scanner le QR code) :</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" value="{{ secret_key }}" readonly>
+                                        <button class="btn btn-outline-secondary" type="button" id="copy-button" onclick="copySecretKey()">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <form method="post" class="needs-validation" novalidate>
+                            {% csrf_token %}
+                            <input type="hidden" name="step" value="verify">
+                            
+                            {% if form.non_field_errors %}
+                            <div class="alert alert-danger" role="alert">
+                                {% for error in form.non_field_errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+
+                            <div class="mb-4">
+                                <label for="{{ form.verification_code.id_for_label }}" class="form-label">{{ form.verification_code.label }}</label>
+                                {{ form.verification_code }}
+                                {% if form.verification_code.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.verification_code.errors %}{{ error }}{% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a href="{% url 'security_settings' %}" class="btn btn-outline-secondary me-md-2">Annuler</a>
+                                <button type="submit" class="btn btn-success">Vérifier et activer</button>
+                            </div>
+                        </form>
+                    {% elif step == 'backup_codes' %}
+                        <div class="alert alert-success mb-4">
+                            <h5 class="alert-heading"><i class="fas fa-check-circle me-2"></i> L'authentification à deux facteurs est activée !</h5>
+                            <p class="mb-0">Votre compte est maintenant protégé par une couche de sécurité supplémentaire.</p>
+                        </div>
+                        
+                        <h5 class="mb-3">Codes de secours</h5>
+                        <p class="text-muted mb-3">
+                            Veuillez conserver précieusement les codes de secours ci-dessous. Ces codes vous permettront d'accéder à votre compte si vous perdez accès à votre application d'authentification. Chaque code ne peut être utilisé qu'une seule fois.
+                        </p>
+
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <div class="row">
+                                    {% for code in backup_codes %}
+                                    <div class="col-md-4 mb-2">
+                                        <code>{{ code }}</code>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 mb-3">
+                            <button id="print-codes" class="btn btn-outline-secondary">
+                                <i class="fas fa-print me-2"></i> Imprimer les codes
+                            </button>
+                        </div>
+                        
+                        <div class="alert alert-warning">
+                            <strong>Important :</strong> Nous vous recommandons de conserver ces codes en lieu sûr, idéalement hors ligne. Vous ne pourrez plus les consulter une fois cette page fermée.
+                        </div>
+
+                        <div class="d-grid">
+                            <a href="{% url 'security_settings' %}" class="btn btn-success">
+                                <i class="fas fa-check me-2"></i> J'ai sauvegardé mes codes de secours
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block user_extra_js %}
+<script>
+    // Add Bootstrap form validation styling
+    document.addEventListener('DOMContentLoaded', function() {
+        const forms = document.querySelectorAll('.needs-validation');
+        
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+
+        // Print backup codes
+        const printCodesButton = document.getElementById('print-codes');
+        if (printCodesButton) {
+            printCodesButton.addEventListener('click', function() {
+                window.print();
+            });
+        }
+    });
+
+    // Copy secret key to clipboard
+    function copySecretKey() {
+        const secretKeyInput = document.querySelector('input[readonly]');
+        secretKeyInput.select();
+        document.execCommand('copy');
+        
+        const copyButton = document.getElementById('copy-button');
+        const originalHTML = copyButton.innerHTML;
+        
+        copyButton.innerHTML = '<i class="fas fa-check"></i>';
+        copyButton.classList.add('btn-success');
+        copyButton.classList.remove('btn-outline-secondary');
+        
+        setTimeout(function() {
+            copyButton.innerHTML = originalHTML;
+            copyButton.classList.remove('btn-success');
+            copyButton.classList.add('btn-outline-secondary');
+        }, 2000);
+    }
+</script>
+{% endblock %}
+
+{% block user_extra_css %}
+<style>
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    .card-body .row, .card-body .row * {
+        visibility: visible;
+    }
+    .card-body .row {
+        position: absolute;
+        left: 0;
+        top: 0;
+    }
+}
+</style>
+{% endblock %}

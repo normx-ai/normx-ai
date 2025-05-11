@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}Gestion des clients | Étape 3{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Gestion des clients (Étape 3/{{ total_steps }})</h4>
+                </div>
+                <div class="card-body">
+                    <div class="progress mb-4">
+                        <div class="progress-bar" role="progressbar" style="width: {{ progress_percent }}%;" aria-valuenow="{{ progress_percent }}" aria-valuemin="0" aria-valuemax="100">{{ progress_percent }}%</div>
+                    </div>
+                    
+                    <h4 class="mb-4">Ajouter vos premiers clients</h4>
+                    
+                    <p>Vous pouvez commencer à ajouter vos clients maintenant ou le faire plus tard.</p>
+                    
+                    <div class="alert alert-info mb-4">
+                        <h5>Comment ça fonctionne</h5>
+                        <p>Pour chaque client ajouté, un espace dédié sera créé. Vous pourrez :</p>
+                        <ul>
+                            <li>Gérer leurs documents comptables</li>
+                            <li>Configurer leurs paramètres spécifiques</li>
+                            <li>Leur donner un accès limité au système via le portail client</li>
+                        </ul>
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="client_option" id="add_later" value="later" checked>
+                                <label class="form-check-label" for="add_later">Ajouter mes clients plus tard</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="client_option" id="add_now" value="now">
+                                <label class="form-check-label" for="add_now">Ajouter mes premiers clients maintenant</label>
+                            </div>
+                        </div>
+                        
+                        <div id="add_clients_section" style="display: none;">
+                            <div class="mb-3">
+                                <label class="form-label">Client 1</label>
+                                <div class="row g-2">
+                                    <div class="col-md-6">
+                                        <input type="text" class="form-control" name="client_name[]" placeholder="Nom de l'entreprise">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <input type="email" class="form-control" name="client_email[]" placeholder="Email de contact">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div id="additional_clients"></div>
+                            
+                            <button type="button" class="btn btn-outline-primary btn-sm mb-3" onclick="addClient()">
+                                <i class="bi bi-plus-circle"></i> Ajouter un autre client
+                            </button>
+                            
+                            <div class="mb-3">
+                                <label for="import_csv" class="form-label">Ou importez plusieurs clients par CSV</label>
+                                <input type="file" class="form-control" id="import_csv" name="import_csv" accept=".csv">
+                                <small class="text-muted">Format: Nom entreprise, Email, Téléphone, NIF</small>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            {% if current_step > 1 %}
+                            <button type="submit" name="action" value="previous" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Précédent
+                            </button>
+                            {% else %}
+                            <div></div> <!-- Espace vide pour maintenir l'alignement -->
+                            {% endif %}
+
+                            <button type="submit" name="action" value="next" class="btn btn-primary">
+                                Continuer<i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const addLaterRadio = document.getElementById('add_later');
+        const addNowRadio = document.getElementById('add_now');
+        const addClientsSection = document.getElementById('add_clients_section');
+        
+        // Fonction pour afficher/masquer la section d'ajout de clients
+        function toggleClientSection() {
+            addClientsSection.style.display = addNowRadio.checked ? 'block' : 'none';
+        }
+        
+        // Écouter les changements sur les boutons radio
+        addLaterRadio.addEventListener('change', toggleClientSection);
+        addNowRadio.addEventListener('change', toggleClientSection);
+        
+        // État initial
+        toggleClientSection();
+    });
+    
+    // Compteur pour les clients
+    let clientCount = 1;
+    
+    function addClient() {
+        clientCount++;
+        const container = document.getElementById('additional_clients');
+        
+        const clientDiv = document.createElement('div');
+        clientDiv.className = 'mb-3';
+        clientDiv.innerHTML = `
+            <div class="d-flex align-items-center">
+                <label class="form-label me-2">Client ${clientCount}</label>
+                <button type="button" class="btn btn-outline-danger btn-sm ms-auto" onclick="removeClient(this)">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+            <div class="row g-2">
+                <div class="col-md-6">
+                    <input type="text" class="form-control" name="client_name[]" placeholder="Nom de l'entreprise">
+                </div>
+                <div class="col-md-6">
+                    <input type="email" class="form-control" name="client_email[]" placeholder="Email de contact">
+                </div>
+            </div>
+        `;
+        
+        container.appendChild(clientDiv);
+    }
+    
+    function removeClient(button) {
+        const clientDiv = button.closest('.mb-3');
+        clientDiv.remove();
+        // Note: we don't decrement clientCount since the labels would get confusing
+    }
+</script>
+{% endblock %}
+{% endblock %}

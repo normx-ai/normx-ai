@@ -1,0 +1,171 @@
+{% extends "users/base.html" %}
+
+{% block title %}Paramètres de sécurité | {{ block.super }}{% endblock %}
+
+{% block user_content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="mb-3">Paramètres de sécurité</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Tableau de bord</a></li>
+                    <li class="breadcrumb-item"><a href="{% if user.user_type == 'COMPANY' %}{% url 'company_profile' %}{% else %}{% url 'accountant_profile' %}{% endif %}">Profil</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Sécurité</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Changer votre mot de passe</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-4">
+                        Un mot de passe fort est essentiel pour protéger votre compte. Utilisez une combinaison de caractères minuscules, majuscules, chiffres et symboles.
+                    </p>
+                    <div class="d-grid">
+                        <a href="{% url 'change_password' %}" class="btn btn-outline-success">
+                            <i class="fas fa-key me-2"></i> Changer mon mot de passe
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Authentification à deux facteurs</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-3">
+                        L'authentification à deux facteurs (A2F) ajoute une couche de sécurité supplémentaire à votre compte. Lorsqu'elle est activée, vous devrez fournir à la fois votre mot de passe et un code de vérification.
+                    </p>
+                    
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="form-check form-switch me-3">
+                            <input class="form-check-input" type="checkbox" id="mfa-status" {% if user.mfa_enabled %}checked{% endif %} disabled>
+                        </div>
+                        <strong>
+                            {% if user.mfa_enabled %}
+                                Authentification à deux facteurs activée
+                            {% else %}
+                                Authentification à deux facteurs désactivée
+                            {% endif %}
+                        </strong>
+                    </div>
+                    
+                    <div class="d-grid">
+                        {% if user.mfa_enabled %}
+                            <form method="post" action="{% url 'disable_mfa' %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-danger">
+                                    <i class="fas fa-shield-alt me-2"></i> Désactiver l'authentification à deux facteurs
+                                </button>
+                            </form>
+                        {% else %}
+                            <a href="{% url 'enable_mfa' %}" class="btn btn-outline-success">
+                                <i class="fas fa-shield-alt me-2"></i> Activer l'authentification à deux facteurs
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Activité de connexion</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <p class="text-muted">
+                            Examinez l'historique de vos connexions pour détecter toute activité suspecte.
+                        </p>
+                    </div>
+                    
+                    <table class="table table-sm table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date et heure</th>
+                                <th>Adresse IP</th>
+                                <th>Navigateur</th>
+                                <th>Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in login_history %}
+                            <tr>
+                                <td>{{ log.timestamp|date:"d/m/Y H:i" }}</td>
+                                <td>{{ log.ip_address }}</td>
+                                <td>{{ log.user_agent|truncatechars:30 }}</td>
+                                <td>
+                                    {% if log.success %}
+                                    <span class="badge bg-success">Réussite</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">Échec</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center py-3">Aucune activité de connexion enregistrée</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning text-white">
+                    <h5 class="mb-0">Sessions actives</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-3">
+                        Voici la liste des appareils où vous êtes actuellement connecté. Si vous ne reconnaissez pas un appareil, déconnectez-le immédiatement et changez votre mot de passe.
+                    </p>
+                    
+                    <div class="list-group mb-4">
+                        {% for session in active_sessions %}
+                        <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">{{ session.device }}</h6>
+                                <p class="mb-1 small text-muted">
+                                    <i class="fas fa-map-marker-alt me-1"></i> {{ session.location }} 
+                                    <span class="ms-2"><i class="fas fa-clock me-1"></i> Connecté le {{ session.started_at|date:"d/m/Y H:i" }}</span>
+                                </p>
+                                {% if session.is_current %}
+                                <span class="badge bg-success">Session actuelle</span>
+                                {% endif %}
+                            </div>
+                            {% if not session.is_current %}
+                            <form method="post" action="{% url 'terminate_session' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="session_key" value="{{ session.session_key }}">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Déconnecter</button>
+                            </form>
+                            {% endif %}
+                        </div>
+                        {% empty %}
+                        <div class="list-group-item text-center py-3">
+                            Aucune autre session active
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="d-grid">
+                        <form method="post" action="{% url 'terminate_all_sessions' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-danger">
+                                <i class="fas fa-power-off me-2"></i> Déconnecter toutes les autres sessions
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

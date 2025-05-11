@@ -1,0 +1,113 @@
+{% extends "users/base.html" %}
+
+{% block title %}Paramètres comptables | {{ block.super }}{% endblock %}
+
+{% block user_content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="mb-3">Paramètres comptables</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Tableau de bord</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'company_profile' %}">Profil</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Paramètres comptables</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 mb-4">
+            <div class="list-group">
+                <a href="{% url 'profile' %}" class="list-group-item list-group-item-action">Profil</a>
+                <a href="{% url 'edit_basic_info' %}" class="list-group-item list-group-item-action">Informations de base</a>
+                <a href="{% url 'edit_company_profile' %}" class="list-group-item list-group-item-action">Profil entreprise</a>
+                <a href="{% url 'accounting_settings' %}" class="list-group-item list-group-item-action active">Paramètres comptables</a>
+                <a href="{% url 'security_settings' %}" class="list-group-item list-group-item-action">Sécurité</a>
+                <a href="{% url 'change_password' %}" class="list-group-item list-group-item-action">Changer de mot de passe</a>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Système comptable</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger" role="alert">
+                            {% for error in form.non_field_errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.accounting_system.id_for_label }}" class="form-label">{{ form.accounting_system.label }}</label>
+                            {{ form.accounting_system }}
+                            {% if form.accounting_system.help_text %}
+                            <div class="form-text">
+                                {{ form.accounting_system.help_text }}
+                            </div>
+                            {% endif %}
+                            {% if form.accounting_system.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.accounting_system.errors %}{{ error }}{% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <h6 class="alert-heading">Systèmes comptables disponibles :</h6>
+                            <dl class="mb-0">
+                                <dt>SYSCOHADA standard</dt>
+                                <dd>Le système comptable OHADA standard, adapté aux PME et grandes entreprises.</dd>
+                                
+                                <dt>SYSBENYL</dt>
+                                <dd>Adapté aux associations, ONG et organisations à but non lucratif.</dd>
+                                
+                                <dt>Système minimal</dt>
+                                <dd>Système simplifié pour les très petites entreprises (TPE) et les entrepreneurs individuels.</dd>
+                            </dl>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a href="{% url 'company_profile' %}" class="btn btn-outline-secondary me-md-2">Annuler</a>
+                            <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block user_extra_js %}
+<script>
+    // Add Bootstrap form validation styling
+    document.addEventListener('DOMContentLoaded', function() {
+        const forms = document.querySelectorAll('.needs-validation');
+        
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+        
+        // Add Bootstrap classes to form controls
+        const selects = document.querySelectorAll('select');
+        selects.forEach(function(select) {
+            select.classList.add('form-select');
+        });
+    });
+</script>
+{% endblock %}

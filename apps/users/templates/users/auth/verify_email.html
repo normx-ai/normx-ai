@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Vérification de l'email | Normx-AI{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Vérification de l'email</h4>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <i class="fas fa-envelope fa-4x text-primary mb-3"></i>
+                    <p class="lead">Un code de vérification a été envoyé à votre adresse email.</p>
+                    <p>Veuillez saisir ce code pour activer votre compte.</p>
+                </div>
+                
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                        {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mb-4">
+                        <label for="{{ form.code.id_for_label }}" class="form-label">{{ form.code.label }}</label>
+                        {{ form.code }}
+                        {% if form.code.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.code.errors %}
+                            {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        {% if form.code.help_text %}
+                        <small class="form-text text-muted">{{ form.code.help_text }}</small>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Vérifier</button>
+                    </div>
+                </form>
+                
+                <div class="mt-4 text-center">
+                    <p>Vous n'avez pas reçu de code? <a href="{% url 'resend_verification_code' %}" class="text-decoration-none">Renvoyer le code</a></p>
+                    <p class="text-muted small">Le code expire après 30 minutes.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+    
+    .card {
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    
+    .card-header {
+        border-bottom: none;
+    }
+    
+    .form-control {
+        border-radius: 5px;
+        padding: 10px 15px;
+        font-size: 1.5rem;
+        text-align: center;
+        letter-spacing: 0.5rem;
+    }
+    
+    .btn-primary {
+        padding: 10px;
+        border-radius: 5px;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Ajouter les classes Bootstrap aux champs du formulaire
+    document.addEventListener('DOMContentLoaded', function() {
+        const codeInput = document.querySelector('input[name="code"]');
+        if (codeInput) {
+            codeInput.classList.add('form-control');
+            
+            // Focus automatique sur le champ de code
+            codeInput.focus();
+            
+            // Formatage du champ pour n'accepter que des chiffres
+            codeInput.addEventListener('input', function(e) {
+                const value = e.target.value;
+                e.target.value = value.replace(/[^0-9]/g, '').substring(0, 6);
+            });
+        }
+    });
+</script>
+{% endblock %}

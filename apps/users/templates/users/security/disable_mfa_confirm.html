@@ -1,0 +1,59 @@
+{% extends "users/base.html" %}
+
+{% block title %}Désactiver l'authentification à deux facteurs | {{ block.super }}{% endblock %}
+
+{% block user_content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="mb-3">Désactiver l'authentification à deux facteurs</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Tableau de bord</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'security_settings' %}">Sécurité</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Désactiver A2F</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning text-white">
+                    <h5 class="mb-0">Confirmation de désactivation</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning mb-4">
+                        <h5 class="alert-heading">Attention !</h5>
+                        <p class="mb-0">
+                            Désactiver l'authentification à deux facteurs réduira significativement la sécurité de votre compte. 
+                            Cette protection supplémentaire est fortement recommandée pour protéger vos données sensibles.
+                        </p>
+                    </div>
+                    
+                    <p class="mb-4">
+                        Si vous désactivez l'authentification à deux facteurs, vous n'aurez plus besoin de fournir un code 
+                        lors de votre connexion. Toutefois, cela rendra votre compte plus vulnérable aux tentatives d'accès non autorisées.
+                    </p>
+                    
+                    <p class="mb-4 text-danger">
+                        <strong>Important :</strong> Si vous perdez l'accès à votre appareil d'authentification, utilisez plutôt les codes de secours 
+                        pour vous connecter, au lieu de désactiver complètement l'A2F.
+                    </p>
+                    
+                    <form method="post" class="mt-4">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'security_settings' %}" class="btn btn-outline-secondary">Annuler</a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-shield-alt me-2"></i> Désactiver l'authentification à deux facteurs
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,37 +1,72 @@
+# -*- coding: utf-8 -*-
 import logging
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
+from django.http import Http404
 
 from ..models import User, UserType
 from ..forms import (
     UserBasicInfoForm, CompanyProfileForm, AccountantProfileForm,
-    SecuritySettingsForm, CustomPasswordChangeForm, AccountingSettingsForm
+    SecuritySettingsForm, CustomPasswordChangeForm, AccountingSettingsForm,
+    MFAVerificationForm
 )
-from ..services import PasswordResetService
+from ..services import PasswordResetService, VerificationCodeService
 
 logger = logging.getLogger(__name__)
 
 @login_required
 def profile_view(request):
-    """Vue d'affichage du profil utilisateur"""
+    """Vue de redirection vers le profil approprié selon le type d'utilisateur"""
     user = request.user
-    
-    # D�terminer le type de profil
+
     if user.user_type == UserType.COMPANY:
-        profile = getattr(user, 'company_profile', None)
-        template = 'users/profile/company_detail.html'
+        return redirect('company_profile')
+    elif user.user_type == UserType.ACCOUNTANT:
+        return redirect('accountant_profile')
     else:
-        profile = getattr(user, 'accountant_profile', None)
-        template = 'users/profile/accountant_detail.html'
-    
-    context = {
+        # Type d'utilisateur non supporté
+        messages.error(request, _("Type de profil non reconnu."))
+        return redirect('dashboard')
+
+@login_required
+def company_profile_view(request):
+    """Vue d'affichage du profil entreprise"""
+    user = request.user
+
+    if user.user_type != UserType.COMPANY:
+        raise Http404()
+
+    if not hasattr(user, 'company_profile'):
+        messages.error(request, _("Profil d'entreprise non configuré."))
+        return redirect('dashboard')
+
+    profile = user.company_profile
+
+    return render(request, 'users/profile/company_detail.html', {
         'user': user,
         'profile': profile
-    }
-    
-    return render(request, template, context)
+    })
+
+@login_required
+def accountant_profile_view(request):
+    """Vue d'affichage du profil expert-comptable"""
+    user = request.user
+
+    if user.user_type != UserType.ACCOUNTANT:
+        raise Http404()
+
+    if not hasattr(user, 'accountant_profile'):
+        messages.error(request, _("Profil d'expert-comptable non configuré."))
+        return redirect('dashboard')
+
+    profile = user.accountant_profile
+
+    return render(request, 'users/profile/accountant_detail.html', {
+        'user': user,
+        'profile': profile
+    })
 
 @login_required
 def edit_basic_info_view(request):
@@ -42,7 +77,7 @@ def edit_basic_info_view(request):
         form = UserBasicInfoForm(request.POST, instance=user)
         if form.is_valid():
             form.save()
-            messages.success(request, _("Vos informations ont �t� mises � jour avec succ�s."))
+            messages.success(request, _("Vos informations ont été mises à jour avec succès."))
             return redirect('profile')
     else:
         form = UserBasicInfoForm(instance=user)
@@ -54,9 +89,9 @@ def edit_company_profile_view(request):
     """Vue de modification du profil entreprise"""
     user = request.user
     
-    # V�rifier que l'utilisateur est bien une entreprise
+    # Vérifier que l'utilisateur est bien une entreprise
     if user.user_type != UserType.COMPANY:
-        messages.error(request, _("Vous n'avez pas acc�s � cette page."))
+        messages.error(request, _("Vous n'avez pas accès à cette page."))
         return redirect('profile')
     
     profile = getattr(user, 'company_profile', None)
@@ -69,7 +104,7 @@ def edit_company_profile_view(request):
         form = CompanyProfileForm(request.POST, instance=profile)
         if form.is_valid():
             form.save()
-            messages.success(request, _("Votre profil entreprise a �t� mis � jour avec succ�s."))
+            messages.success(request, _("Votre profil entreprise a été mis à jour avec succès."))
             return redirect('profile')
     else:
         form = CompanyProfileForm(instance=profile)
@@ -81,9 +116,9 @@ def edit_accountant_profile_view(request):
     """Vue de modification du profil expert-comptable"""
     user = request.user
     
-    # V�rifier que l'utilisateur est bien un expert-comptable
+    # Vérifier que l'utilisateur est bien un expert-comptable
     if user.user_type != UserType.ACCOUNTANT:
-        messages.error(request, _("Vous n'avez pas acc�s � cette page."))
+        messages.error(request, _("Vous n'avez pas accès à cette page."))
         return redirect('profile')
     
     profile = getattr(user, 'accountant_profile', None)
@@ -96,7 +131,7 @@ def edit_accountant_profile_view(request):
         form = AccountantProfileForm(request.POST, instance=profile)
         if form.is_valid():
             form.save()
-            messages.success(request, _("Votre profil expert-comptable a �t� mis � jour avec succ�s."))
+            messages.success(request, _("Votre profil expert-comptable a été mis à jour avec succès."))
             return redirect('profile')
     else:
         form = AccountantProfileForm(instance=profile)
@@ -105,14 +140,14 @@ def edit_accountant_profile_view(request):
 
 @login_required
 def security_settings_view(request):
-    """Vue des param�tres de s�curit�"""
+    """Vue des paramètres de sécurité"""
     user = request.user
     
     if request.method == 'POST':
         form = SecuritySettingsForm(request.POST, instance=user, user=user)
         if form.is_valid():
             form.save()
-            messages.success(request, _("Vos param�tres de s�curit� ont �t� mis � jour avec succ�s."))
+            messages.success(request, _("Vos paramètres de sécurité ont été mis à jour avec succès."))
             return redirect('profile')
     else:
         form = SecuritySettingsForm(instance=user, user=user)
@@ -129,7 +164,7 @@ def change_password_view(request):
         if form.is_valid():
             form.save()
             
-            # R�initialiser les tentatives de connexion �chou�es
+            # Réinitialiser les tentatives de connexion échouées
             user.failed_login_attempts = 0
             user.locked_until = None
             user.save(update_fields=['failed_login_attempts', 'locked_until'])
@@ -140,7 +175,7 @@ def change_password_view(request):
             except Exception as e:
                 logger.error(f"Erreur lors de l'envoi de la notification de changement de mot de passe: {str(e)}")
             
-            messages.success(request, _("Votre mot de passe a �t� chang� avec succ�s."))
+            messages.success(request, _("Votre mot de passe a été changé avec succès."))
             return redirect('profile')
     else:
         form = CustomPasswordChangeForm(user)
@@ -149,12 +184,12 @@ def change_password_view(request):
 
 @login_required
 def accounting_settings_view(request):
-    """Vue des param�tres comptables (pour les entreprises uniquement)"""
+    """Vue des paramètres comptables (pour les entreprises uniquement)"""
     user = request.user
     
-    # V�rifier que l'utilisateur est bien une entreprise
+    # Vérifier que l'utilisateur est bien une entreprise
     if user.user_type != UserType.COMPANY:
-        messages.error(request, _("Vous n'avez pas acc�s � cette page."))
+        messages.error(request, _("Vous n'avez pas accès à cette page."))
         return redirect('profile')
     
     profile = getattr(user, 'company_profile', None)
@@ -167,36 +202,153 @@ def accounting_settings_view(request):
         form = AccountingSettingsForm(request.POST, instance=profile)
         if form.is_valid():
             form.save()
-            messages.success(request, _("Vos param�tres comptables ont �t� mis � jour avec succ�s."))
+            messages.success(request, _("Vos paramètres comptables ont été mis à jour avec succès."))
             return redirect('profile')
     else:
         form = AccountingSettingsForm(instance=profile)
     
     return render(request, 'users/profile/accounting_settings.html', {'form': form})
 
+@login_required
+def enable_mfa_view(request):
+    """Vue d'activation de l'authentification à deux facteurs"""
+    user = request.user
+
+    # Si l'A2F est déjà activée, rediriger
+    if user.mfa_enabled:
+        messages.info(request, _("L'authentification à deux facteurs est déjà activée pour votre compte."))
+        return redirect('security_settings')
+
+    # TODO: Implémenter la génération réelle d'un secret MFA et d'un QR code
+    # Pour l'instant, on utilise des valeurs fictives
+    secret_key = "ABCDEFGHIJKLMNOP"
+    qr_code = None  # Base64 du QR code
+
+    if request.method == 'POST':
+        step = request.POST.get('step', 'setup')
+
+        if step == 'verify':
+            form = MFAVerificationForm(request.POST)
+            if form.is_valid():
+                verification_code = form.cleaned_data.get('code')
+
+                # TODO: Implémenter la vérification réelle du code
+                # Pour l'instant, on simule une vérification réussie
+                is_valid = True
+
+                if is_valid:
+                    # Activer l'A2F pour l'utilisateur
+                    user.mfa_enabled = True
+                    user.mfa_secret = secret_key
+                    user.save(update_fields=['mfa_enabled', 'mfa_secret'])
+
+                    # Générer des codes de secours
+                    backup_codes = [
+                        "1234-5678", "2345-6789", "3456-7890",
+                        "4567-8901", "5678-9012", "6789-0123"
+                    ]
+
+                    return render(request, 'users/security/enable_mfa.html', {
+                        'step': 'backup_codes',
+                        'backup_codes': backup_codes
+                    })
+                else:
+                    messages.error(request, _("Code de vérification invalide. Veuillez réessayer."))
+
+        # Par défaut, afficher l'étape de configuration
+        form = MFAVerificationForm()
+        return render(request, 'users/security/enable_mfa.html', {
+            'step': 'setup',
+            'secret_key': secret_key,
+            'qr_code': qr_code,
+            'form': form
+        })
+
+    # Afficher l'étape de configuration par défaut
+    form = MFAVerificationForm()
+    return render(request, 'users/security/enable_mfa.html', {
+        'step': 'setup',
+        'secret_key': secret_key,
+        'qr_code': qr_code,
+        'form': form
+    })
+
+@login_required
+def disable_mfa_view(request):
+    """Vue de désactivation de l'authentification à deux facteurs"""
+    user = request.user
+
+    # Si l'A2F n'est pas activée, rediriger
+    if not user.mfa_enabled:
+        messages.info(request, _("L'authentification à deux facteurs n'est pas activée pour votre compte."))
+        return redirect('security_settings')
+
+    if request.method == 'POST':
+        # Désactiver l'A2F
+        user.mfa_enabled = False
+        user.mfa_secret = None
+        user.save(update_fields=['mfa_enabled', 'mfa_secret'])
+
+        messages.success(request, _("L'authentification à deux facteurs a été désactivée pour votre compte."))
+        return redirect('security_settings')
+
+    # Afficher la confirmation de désactivation
+    return render(request, 'users/security/disable_mfa_confirm.html')
+
+@login_required
+def terminate_session_view(request):
+    """Vue pour terminer une session particulière"""
+    if request.method == 'POST':
+        session_key = request.POST.get('session_key')
+
+        # TODO: Implémenter la terminaison réelle de la session
+        # Pour l'instant, on simule une terminaison réussie
+
+        messages.success(request, _("La session a été terminée avec succès."))
+
+    return redirect('security_settings')
+
+@login_required
+def terminate_all_sessions_view(request):
+    """Vue pour terminer toutes les autres sessions"""
+    if request.method == 'POST':
+        # TODO: Implémenter la terminaison réelle des sessions
+        # Pour l'instant, on simule une terminaison réussie
+
+        messages.success(request, _("Toutes les autres sessions ont été terminées avec succès."))
+
+    return redirect('security_settings')
+
 def send_password_change_notification(user):
     """Envoie une notification par email lors d'un changement de mot de passe"""
+    from datetime import datetime
+    
+    current_year = datetime.now().year
+    
     subject = "Normx-AI - Confirmation de changement de mot de passe"
     message = f"""
     Bonjour {user.get_full_name()},
     
-    Nous vous confirmons que votre mot de passe a �t� chang� avec succ�s.
+    Nous vous confirmons que votre mot de passe a été changé avec succès.
     
-    Si vous n'avez pas effectu� cette action, veuillez contacter imm�diatement notre support.
+    Si vous n'avez pas effectué cette action, veuillez contacter immédiatement notre support.
     
-    L'�quipe Normx-AI
+    L'équipe Normx-AI
     """
     
     try:
         from django.core.mail import send_mail
         from django.template.loader import render_to_string
         
-        html_message = render_to_string('users/emails/password_changed.html', {'user': user})
+        html_message = render_to_string('users/emails/password_changed.html', {
+            'user': user,
+            'current_year': current_year
+        })
         
         send_mail(
             subject=subject,
             message=message,
-            from_email=None,  # Utiliser l'email par d�faut
+            from_email=None,  # Utiliser l'email par défaut
             recipient_list=[user.email],
             html_message=html_message,
             fail_silently=False

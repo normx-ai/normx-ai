@@ -6,9 +6,12 @@ from .auth_views import (
 )
 
 from .profile_views import (
-    profile_view, edit_basic_info_view, edit_company_profile_view,
+    profile_view, company_profile_view, accountant_profile_view,
+    edit_basic_info_view, edit_company_profile_view,
     edit_accountant_profile_view, security_settings_view,
-    change_password_view, accounting_settings_view
+    change_password_view, accounting_settings_view,
+    enable_mfa_view, disable_mfa_view,
+    terminate_session_view, terminate_all_sessions_view
 )
 
 from .dashboard_views import (

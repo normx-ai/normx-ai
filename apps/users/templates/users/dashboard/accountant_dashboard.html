@@ -1,0 +1,168 @@
+{% extends "users/base.html" %}
+
+{% block title %}Tableau de bord | {{ block.super }}{% endblock %}
+
+{% block user_content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="mb-3">Tableau de bord du cabinet comptable</h1>
+            <p class="lead">Bienvenue, {{ user.get_full_name }}!</p>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Informations du cabinet</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Nom du cabinet:</strong> {{ profile.firm_name }}</p>
+                    <p><strong>Agrément:</strong> {{ profile.professional_id }}</p>
+                    <p><strong>Certifications:</strong>
+                        {% if profile.syscohada_certified %}<span class="badge bg-success me-1">SYSCOHADA</span>{% endif %}
+                        {% if profile.sysbenyl_certified %}<span class="badge bg-success me-1">SYSBENYL</span>{% endif %}
+                        {% if profile.minimal_certified %}<span class="badge bg-success me-1">Système minimal</span>{% endif %}
+                    </p>
+                    <a href="{% url 'edit_accountant_profile' %}" class="btn btn-outline-primary mt-2">Modifier le profil</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Mes clients</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2 mb-3">
+                        <button class="btn btn-outline-success">
+                            <i class="fas fa-plus me-2"></i> Ajouter un client
+                        </button>
+                    </div>
+                    <div class="list-group">
+                        <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            SARL Example
+                            <span class="badge bg-warning rounded-pill">À traiter</span>
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            Entreprise ABC
+                            <span class="badge bg-success rounded-pill">À jour</span>
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            Association XYZ
+                            <span class="badge bg-danger rounded-pill">Urgent</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="card-footer bg-light">
+                    <small class="text-muted">3 clients actifs</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Échéances</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-danger" role="alert">
+                        <i class="fas fa-exclamation-circle me-2"></i> TVA SARL Example - Échéance dans 3 jours
+                    </div>
+                    <div class="alert alert-warning" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i> Bilan Association XYZ - Échéance dans 10 jours
+                    </div>
+                    <div class="alert alert-info" role="alert">
+                        <i class="fas fa-info-circle me-2"></i> Déclaration sociale Entreprise ABC - Échéance dans 15 jours
+                    </div>
+                    <a href="#" class="btn btn-outline-info btn-sm w-100 mt-2">Voir toutes les échéances</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-8 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">Activité récente</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">Déclaration TVA soumise</h6>
+                                <small>il y a 3 heures</small>
+                            </div>
+                            <p class="mb-1">Déclaration TVA pour Entreprise ABC</p>
+                            <small class="text-muted">Par: {{ user.get_full_name }}</small>
+                        </div>
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">Nouveau client ajouté</h6>
+                                <small>hier</small>
+                            </div>
+                            <p class="mb-1">Association XYZ a été ajoutée à votre portefeuille</p>
+                            <small class="text-muted">Par: {{ user.get_full_name }}</small>
+                        </div>
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">Bilan annuel finalisé</h6>
+                                <small>il y a 3 jours</small>
+                            </div>
+                            <p class="mb-1">Bilan annuel pour SARL Example</p>
+                            <small class="text-muted">Par: {{ user.get_full_name }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">Outils & ressources</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-primary">
+                            <i class="fas fa-file-invoice me-2"></i> Créer un modèle
+                        </button>
+                        <button class="btn btn-outline-success">
+                            <i class="fas fa-robot me-2"></i> Assistant IA
+                        </button>
+                        <button class="btn btn-outline-info">
+                            <i class="fas fa-calculator me-2"></i> Outils de calcul
+                        </button>
+                        <button class="btn btn-outline-secondary">
+                            <i class="fas fa-book me-2"></i> Ressources comptables
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block user_extra_css %}
+<style>
+    .card {
+        transition: transform 0.3s;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .list-group-item {
+        transition: background-color 0.3s;
+    }
+    
+    .list-group-item:hover {
+        background-color: rgba(0, 0, 0, 0.03);
+    }
+</style>
+{% endblock %}

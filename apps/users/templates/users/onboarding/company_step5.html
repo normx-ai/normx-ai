@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}Journaux comptables | Étape 5{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Journaux comptables (Étape 5/{{ total_steps }})</h4>
+                </div>
+                <div class="card-body">
+                    <div class="progress mb-4">
+                        <div class="progress-bar" role="progressbar" style="width: {{ progress_percent }}%;" aria-valuenow="{{ progress_percent }}" aria-valuemin="0" aria-valuemax="100">{{ progress_percent }}%</div>
+                    </div>
+                    
+                    <h4 class="mb-4">Configuration des journaux comptables</h4>
+                    
+                    <p>Les journaux comptables permettent de classer vos opérations par type. Nous avons créé les journaux standards pour vous.</p>
+                    
+                    <div class="table-responsive mb-4">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Nom</th>
+                                    <th>Type</th>
+                                    <th>Active</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>ACH</td>
+                                    <td>Journal des Achats</td>
+                                    <td>Achats</td>
+                                    <td><input type="checkbox" class="form-check-input" checked disabled></td>
+                                </tr>
+                                <tr>
+                                    <td>VTE</td>
+                                    <td>Journal des Ventes</td>
+                                    <td>Ventes</td>
+                                    <td><input type="checkbox" class="form-check-input" checked disabled></td>
+                                </tr>
+                                <tr>
+                                    <td>BNQ</td>
+                                    <td>Journal de Banque</td>
+                                    <td>Banque</td>
+                                    <td><input type="checkbox" class="form-check-input" checked disabled></td>
+                                </tr>
+                                <tr>
+                                    <td>CSE</td>
+                                    <td>Journal de Caisse</td>
+                                    <td>Caisse</td>
+                                    <td><input type="checkbox" class="form-check-input" checked disabled></td>
+                                </tr>
+                                <tr>
+                                    <td>OD</td>
+                                    <td>Journal des Opérations Diverses</td>
+                                    <td>Général</td>
+                                    <td><input type="checkbox" class="form-check-input" checked disabled></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="add_journals" name="add_journals">
+                            <label class="form-check-label" for="add_journals">Je souhaite ajouter des journaux supplémentaires</label>
+                        </div>
+                        
+                        <div id="additional_journals" class="mb-3" style="display: none;">
+                            <label class="form-label">Journaux supplémentaires</label>
+                            <div class="mb-2">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" placeholder="Code (ex: SAL)" name="journal_code[]">
+                                    <input type="text" class="form-control" placeholder="Nom (ex: Journal des Salaires)" name="journal_name[]">
+                                    <select class="form-select" name="journal_type[]">
+                                        <option value="general">Général</option>
+                                        <option value="purchase">Achats</option>
+                                        <option value="sale">Ventes</option>
+                                        <option value="bank">Banque</option>
+                                        <option value="cash">Caisse</option>
+                                    </select>
+                                    <button class="btn btn-outline-secondary" type="button" onclick="removeJournal(this)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="addJournal()">
+                                <i class="bi bi-plus-circle"></i> Ajouter un journal
+                            </button>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            {% if current_step > 1 %}
+                            <button type="submit" name="action" value="previous" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Précédent
+                            </button>
+                            {% else %}
+                            <div></div> <!-- Espace vide pour maintenir l'alignement -->
+                            {% endif %}
+
+                            <button type="submit" name="action" value="next" class="btn btn-primary">
+                                Continuer<i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Gérer l'affichage des journaux supplémentaires
+        const addJournalsCheckbox = document.getElementById('add_journals');
+        const additionalJournalsDiv = document.getElementById('additional_journals');
+        
+        addJournalsCheckbox.addEventListener('change', function() {
+            additionalJournalsDiv.style.display = this.checked ? 'block' : 'none';
+        });
+    });
+    
+    function addJournal() {
+        const container = document.getElementById('additional_journals');
+        const journalDiv = document.createElement('div');
+        journalDiv.className = 'mb-2';
+        journalDiv.innerHTML = `
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="Code (ex: SAL)" name="journal_code[]">
+                <input type="text" class="form-control" placeholder="Nom (ex: Journal des Salaires)" name="journal_name[]">
+                <select class="form-select" name="journal_type[]">
+                    <option value="general">Général</option>
+                    <option value="purchase">Achats</option>
+                    <option value="sale">Ventes</option>
+                    <option value="bank">Banque</option>
+                    <option value="cash">Caisse</option>
+                </select>
+                <button class="btn btn-outline-secondary" type="button" onclick="removeJournal(this)">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+        `;
+        container.insertBefore(journalDiv, container.lastElementChild);
+    }
+    
+    function removeJournal(button) {
+        const journalDiv = button.closest('.mb-2');
+        journalDiv.remove();
+    }
+</script>
+{% endblock %}
+{% endblock %}

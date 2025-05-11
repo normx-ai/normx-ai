@@ -1,0 +1,161 @@
+{% extends "users/base.html" %}
+
+{% block title %}Profil expert-comptable | {{ block.super }}{% endblock %}
+
+{% block user_content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="mb-3">Profil d'expert-comptable</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Tableau de bord</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Profil</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Informations personnelles</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto" style="width: 100px; height: 100px; font-size: 40px;">
+                            {{ user.first_name|first }}{{ user.last_name|first }}
+                        </div>
+                        <h4 class="mt-3">{{ user.get_full_name }}</h4>
+                        <p class="text-muted">Expert-comptable</p>
+                    </div>
+                    
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-envelope me-2"></i> Email</span>
+                            <span>{{ user.email }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-phone me-2"></i> Téléphone</span>
+                            <span>{{ user.phone_number }}</span>
+                        </li>
+                    </ul>
+                    
+                    <div class="d-grid gap-2 mt-3">
+                        <a href="{% url 'edit_basic_info' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-user-edit me-2"></i> Modifier mes informations
+                        </a>
+                        <a href="{% url 'change_password' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-key me-2"></i> Changer le mot de passe
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Informations du cabinet</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-building me-2"></i> Nom du cabinet</h6>
+                            <p>{{ profile.firm_name }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-id-card me-2"></i> Numéro d'agrément professionnel</h6>
+                            <p>{{ profile.professional_id }}</p>
+                        </div>
+                    </div>
+                    
+                    <h6><i class="fas fa-map-marker-alt me-2"></i> Adresse</h6>
+                    <p>
+                        {{ profile.address }}<br>
+                        {{ profile.postal_code }} {{ profile.city }}<br>
+                        {{ profile.country }}
+                    </p>
+                    
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h6 class="mb-0"><i class="fas fa-certificate me-2"></i> Certifications</h6>
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>SYSCOHADA (standard)</span>
+                                <span>{% if profile.syscohada_certified %}
+                                    <i class="fas fa-check-circle text-success"></i>
+                                {% else %}
+                                    <i class="fas fa-times-circle text-muted"></i>
+                                {% endif %}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>SYSBENYL (associations/ONG)</span>
+                                <span>{% if profile.sysbenyl_certified %}
+                                    <i class="fas fa-check-circle text-success"></i>
+                                {% else %}
+                                    <i class="fas fa-times-circle text-muted"></i>
+                                {% endif %}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>Système minimal (TPE)</span>
+                                <span>{% if profile.minimal_certified %}
+                                    <i class="fas fa-check-circle text-success"></i>
+                                {% else %}
+                                    <i class="fas fa-times-circle text-muted"></i>
+                                {% endif %}</span>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="d-grid gap-2 mt-4">
+                        <a href="{% url 'edit_accountant_profile' %}" class="btn btn-outline-info">
+                            <i class="fas fa-edit me-2"></i> Modifier les informations du cabinet
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card shadow-sm mt-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Sécurité</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <h6 class="mb-0"><i class="fas fa-shield-alt me-2"></i> Authentification à deux facteurs</h6>
+                            <p class="text-muted mb-0 small">Sécurisez votre compte avec une vérification supplémentaire</p>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="mfa-switch" {% if user.mfa_enabled %}checked{% endif %} disabled>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <h6 class="mb-0"><i class="fas fa-history me-2"></i> Dernière connexion</h6>
+                            <p class="text-muted mb-0 small">{{ user.last_login|date:"d/m/Y H:i" }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 mt-3">
+                        <a href="{% url 'security_settings' %}" class="btn btn-outline-success">
+                            <i class="fas fa-lock me-2"></i> Paramètres de sécurité
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block user_extra_css %}
+<style>
+    .avatar {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Tutoriel | Étape 6{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Présentation des fonctionnalités (Étape 6/{{ total_steps }})</h4>
+                </div>
+                <div class="card-body">
+                    <div class="progress mb-4">
+                        <div class="progress-bar" role="progressbar" style="width: {{ progress_percent }}%;" aria-valuenow="{{ progress_percent }}" aria-valuemin="0" aria-valuemax="100">{{ progress_percent }}%</div>
+                    </div>
+                    
+                    <h4 class="mb-4">Découvrez les principales fonctionnalités</h4>
+                    
+                    <p>Félicitations ! Votre système comptable est maintenant configuré et prêt à l'emploi.</p>
+                    <p>Voici un aperçu des principales fonctionnalités qui vous attendent :</p>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <i class="bi bi-receipt"></i>
+                                        Saisie des écritures
+                                    </h5>
+                                    <p class="card-text">Enregistrez facilement vos transactions avec l'aide de notre assistant IA qui vous suggère les comptes appropriés.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <i class="bi bi-clipboard-data"></i>
+                                        Rapports financiers
+                                    </h5>
+                                    <p class="card-text">Générez instantanément votre bilan, compte de résultat et autres états financiers conformes à la réglementation OHADA.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <i class="bi bi-cash-coin"></i>
+                                        Suivi de trésorerie
+                                    </h5>
+                                    <p class="card-text">Surveillez vos flux de trésorerie et recevez des alertes intelligentes pour anticiper les problèmes de liquidité.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <i class="bi bi-robot"></i>
+                                        Assistant IA
+                                    </h5>
+                                    <p class="card-text">Posez des questions en langage naturel pour obtenir des insights sur votre situation financière ou des conseils comptables.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-success mt-3">
+                        <h5><i class="bi bi-lightbulb"></i> Conseil</h5>
+                        <p>Notre équipe support est disponible pour vous aider dans vos premiers pas. N'hésitez pas à nous contacter !</p>
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="watch_tutorial" name="watch_tutorial">
+                            <label class="form-check-label" for="watch_tutorial">Je souhaite regarder le tutoriel vidéo complet</label>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            {% if current_step > 1 %}
+                            <button type="submit" name="action" value="previous" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Précédent
+                            </button>
+                            {% else %}
+                            <div></div> <!-- Espace vide pour maintenir l'alignement -->
+                            {% endif %}
+
+                            <button type="submit" name="action" value="next" class="btn btn-primary">
+                                Terminer la configuration<i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

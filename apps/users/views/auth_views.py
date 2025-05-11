@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import logging
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout
@@ -8,6 +9,7 @@ from django.urls import reverse
 from django.views.decorators.http import require_http_methods
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import PermissionDenied
+from django.conf import settings
 
 from ..models import User, UserType
 from ..forms import (
@@ -24,282 +26,412 @@ logger = logging.getLogger(__name__)
 
 def login_view(request):
     """Vue de connexion utilisateur"""
+    # Si l'utilisateur est d√©j√† connect√©, le rediriger vers sa destination
     if request.user.is_authenticated:
+        messages.info(request, _("Vous √™tes d√©j√† connect√©."))
+
+        # Si next est sp√©cifi√© dans l'URL, rediriger vers cette page
+        next_url = request.GET.get('next')
+        if next_url:
+            return redirect(next_url)
+
+        # Sinon, rediriger vers le tableau de bord
         return redirect('dashboard')
-        
+
+    # Debug - Afficher des informations sur la session et les cookies
+    if settings.DEBUG:
+        print("=" * 60)
+        print("LOGIN VIEW DEBUG")
+        print(f"SESSION ID: {request.session.session_key}")
+        print(f"SESSION MODIFIED: {request.session.modified}")
+        print(f"SESSION IS EMPTY: {request.session.is_empty()}")
+        if request.method == 'POST':
+            print(f"CSRF Debug: token received: {request.POST.get('csrfmiddlewaretoken')}")
+            print(f"CSRF Debug: cookie value: {request.COOKIES.get('csrftoken')}")
+        print("=" * 60)
+
+    # Traitement du formulaire de connexion
     if request.method == 'POST':
         form = LoginForm(request, data=request.POST)
         if form.is_valid():
             email = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
             remember = form.cleaned_data.get('remember_me', False)
-            
+
+            # Tentative de connexion
             user, error = AuthenticationService.login(request, email, password, remember)
-            
+
             if user:
-                # GÈrer l'authentification ‡ deux facteurs si activÈe
+                # G√©rer l'authentification √† deux facteurs si activ√©e
                 if user.mfa_enabled:
-                    # Stocker les informations nÈcessaires en session
+                    # Stocker les informations n√©cessaires en session
                     request.session['mfa_user_id'] = str(user.id)
                     request.session['mfa_remember'] = remember
+
+                    # Conserver l'URL de redirection apr√®s MFA
+                    next_url = request.POST.get('next') or request.GET.get('next')
+                    if next_url:
+                        request.session['mfa_next'] = next_url
+
                     return redirect('mfa_verification')
-                    
-                # Connexion standard si MFA non activÈe
+
+                # Connexion standard si MFA non activ√©e
                 login(request, user)
-                
-                # VÈrifier si c'est un premier accËs
+
+                # V√©rifier si c'est un premier acc√®s et rediriger vers l'onboarding
                 if user.user_type == UserType.COMPANY:
                     if hasattr(user, 'company_profile') and not user.company_profile.onboarding_completed:
                         return redirect('company_onboarding')
                 elif user.user_type == UserType.ACCOUNTANT:
                     if hasattr(user, 'accountant_profile') and not user.accountant_profile.onboarding_completed:
                         return redirect('accountant_onboarding')
-                
-                # Redirection vers le tableau de bord
+
+                # Redirection vers next s'il existe, sinon vers le tableau de bord
+                next_url = request.POST.get('next') or request.GET.get('next')
+                if next_url:
+                    return redirect(next_url)
                 return redirect('dashboard')
             else:
+                # Afficher l'erreur d'authentification
                 messages.error(request, error)
     else:
+        # Cr√©ation d'un nouveau formulaire
         form = LoginForm()
-    
-    return render(request, 'users/auth/login.html', {'form': form})
+
+    # Contexte pour le template
+    context = {
+        'form': form,
+        'next': request.GET.get('next', '')
+    }
+
+    return render(request, 'users/auth/login.html', context)
 
 def mfa_verification_view(request):
-    """Vue de vÈrification pour l'authentification ‡ deux facteurs"""
-    # VÈrifier que l'utilisateur est en cours d'authentification MFA
+    """Vue de v√©rification pour l'authentification √† deux facteurs"""
+    # V√©rifier que l'utilisateur est en cours d'authentification MFA
     if 'mfa_user_id' not in request.session:
         return redirect('login')
-    
+
     user_id = request.session.get('mfa_user_id')
     user = get_object_or_404(User, id=user_id)
-    
+
+    # G√©n√©rer et stocker un code MFA pour le mode d√©veloppement
+    debug_mfa_code = None
+    if settings.DEBUG:
+        # G√©n√©rer un code MFA fixe pour le d√©veloppement
+        debug_mfa_code = '123456'
+        # Si l'utilisateur n'a pas de session, stocker le code
+        if 'debug_mfa_code' not in request.session:
+            request.session['debug_mfa_code'] = debug_mfa_code
+
     if request.method == 'POST':
         form = MFAVerificationForm(request.POST)
         if form.is_valid():
             code = form.cleaned_data.get('code')
-            
-            # TODO: ImplÈmenter la vÈrification rÈelle du code MFA
-            # Pour l'instant, on simule une vÈrification rÈussie avec n'importe quel code
-            is_valid = True  # ¿ remplacer par une vÈrification rÈelle
-            
+
+            # En mode d√©veloppement, utiliser le code de debug
+            if settings.DEBUG:
+                is_valid = (code == request.session.get('debug_mfa_code', '123456'))
+            else:
+                # TODO: Impl√©menter la v√©rification r√©elle du code MFA
+                # Pour l'instant, on simule une v√©rification r√©ussie avec n'importe quel code
+                is_valid = True  # √Ä remplacer par une v√©rification r√©elle
+
             if is_valid:
-                # Connecter l'utilisateur
+                # R√©cup√©rer l'option "se souvenir de moi"
                 remember = request.session.get('mfa_remember', False)
+
+                # Connecter l'utilisateur
                 login(request, user)
-                
-                # Nettoyer les donnÈes de session
-                if 'mfa_user_id' in request.session:
-                    del request.session['mfa_user_id']
-                if 'mfa_remember' in request.session:
-                    del request.session['mfa_remember']
-                
-                # GÈrer l'expiration de session selon l'option "se souvenir de moi"
+
+                # R√©cup√©rer l'URL de redirection, si pr√©sente
+                next_url = request.session.get('mfa_next')
+
+                # Nettoyer les donn√©es de session
+                keys_to_clean = ['mfa_user_id', 'mfa_remember', 'mfa_next', 'debug_mfa_code']
+                for key in keys_to_clean:
+                    if key in request.session:
+                        del request.session[key]
+
+                # G√©rer l'expiration de session selon l'option "se souvenir de moi"
                 if remember:
                     # Session de 2 semaines
                     request.session.set_expiry(1209600)
                 else:
-                    # Session qui expire ‡ la fermeture du navigateur
+                    # Session qui expire √† la fermeture du navigateur
                     request.session.set_expiry(0)
-                
-                # VÈrifier si c'est un premier accËs
+
+                # V√©rifier si c'est un premier acc√®s
                 if user.user_type == UserType.COMPANY:
                     if hasattr(user, 'company_profile') and not user.company_profile.onboarding_completed:
                         return redirect('company_onboarding')
                 elif user.user_type == UserType.ACCOUNTANT:
                     if hasattr(user, 'accountant_profile') and not user.accountant_profile.onboarding_completed:
                         return redirect('accountant_onboarding')
-                
-                # Redirection vers le tableau de bord
+
+                # Redirection vers next s'il existe, sinon vers le tableau de bord
+                if next_url:
+                    return redirect(next_url)
                 return redirect('dashboard')
             else:
-                messages.error(request, _("Code d'authentification invalide. Veuillez rÈessayer."))
+                messages.error(request, _("Code d'authentification invalide. Veuillez r√©essayer."))
     else:
         form = MFAVerificationForm()
-    
-    return render(request, 'users/auth/mfa_verification.html', {'form': form})
+
+    context = {
+        'form': form
+    }
+
+    # En mode d√©veloppement, afficher le code MFA dans le template
+    if settings.DEBUG:
+        context['debug_mfa_code'] = request.session.get('debug_mfa_code', debug_mfa_code)
+        context['is_debug'] = True
+
+    return render(request, 'users/auth/mfa_verification.html', context)
 
 @login_required
 def logout_view(request):
-    """Vue de dÈconnexion"""
+    """Vue de d√©connexion"""
     user = request.user
+
+    # D√©connecter l'utilisateur et nettoyer la session
     AuthenticationService.logout(request, user)
     logout(request)
-    messages.success(request, _("Vous avez ÈtÈ dÈconnectÈ avec succËs."))
+
+    # Ajouter un message de succ√®s
+    messages.success(request, _("Vous avez √©t√© d√©connect√© avec succ√®s."))
+
+    # Nettoyer compl√®tement la session (y compris registration_user_type)
+    request.session.flush()
+
+    # Rediriger vers la page de connexion
     return redirect('login')
 
 def register_select_type_view(request):
-    """Vue de sÈlection du type d'utilisateur lors de l'inscription"""
+    """Vue de s√©lection du type d'utilisateur lors de l'inscription"""
+    # Debug - Affichons des informations de d√©bogage
+    print("============ REGISTER SELECT TYPE VIEW ============")
+    print(f"REQUEST METHOD: {request.method}")
+    print(f"USER AUTHENTICATED: {request.user.is_authenticated}")
+    print(f"SESSION DATA: {request.session.items()}")
+
+    # Si l'utilisateur est d√©j√† connect√©, l'avertir et le rediriger
     if request.user.is_authenticated:
+        print("User is authenticated, redirecting to dashboard")
+        # Ajouter un message d'information
+        messages.info(request, _("Vous √™tes d√©j√† connect√©. D√©connectez-vous pour cr√©er un nouveau compte."))
+        # Rediriger vers le tableau de bord
         return redirect('dashboard')
-        
+
+    # Nettoyer les anciennes donn√©es d'inscription en session
+    # (au cas o√π l'utilisateur aurait abandonn√© une inscription pr√©c√©dente)
+    if 'registration_user_type' in request.session:
+        del request.session['registration_user_type']
+
     if request.method == 'POST':
+        print(f"POST DATA: {request.POST}")
         form = UserTypeSelectForm(request.POST)
         if form.is_valid():
             user_type = form.cleaned_data.get('user_type')
             request.session['registration_user_type'] = user_type
-            
+            print(f"Form is valid, user_type selected: {user_type}")
+
             if user_type == UserType.COMPANY:
+                print("Redirecting to register_company")
                 return redirect('register_company')
             else:
+                print("Redirecting to register_accountant")
                 return redirect('register_accountant')
+        else:
+            print(f"Form is invalid, errors: {form.errors}")
     else:
+        print("Creating an empty form")
         form = UserTypeSelectForm()
-    
+
+    print(f"Rendering register_select_type template with form: {form}")
     return render(request, 'users/auth/register_select_type.html', {'form': form})
 
 def register_company_view(request):
     """Vue d'inscription pour les entreprises"""
+    # Si l'utilisateur est d√©j√† connect√©, l'avertir et le rediriger
     if request.user.is_authenticated:
+        messages.info(request, _("Vous √™tes d√©j√† connect√©. D√©connectez-vous pour cr√©er un nouveau compte."))
         return redirect('dashboard')
-        
-    # VÈrifier que le type d'utilisateur a ÈtÈ sÈlectionnÈ
+
+    # Debug - Afficher le token CSRF re√ßu
+    if settings.DEBUG and request.method == 'POST':
+        print(f"CSRF Debug: token received: {request.POST.get('csrfmiddlewaretoken')}")
+        print(f"CSRF Debug: cookie value: {request.COOKIES.get('csrftoken')}")
+
+    # V√©rifier que le type d'utilisateur a √©t√© s√©lectionn√© correctement
     if 'registration_user_type' not in request.session or request.session['registration_user_type'] != UserType.COMPANY:
+        # Rediriger vers la page de s√©lection
         return redirect('register_select_type')
-        
+
     if request.method == 'POST':
         form = CompanyRegistrationForm(request.POST)
         if form.is_valid():
-            # RÈcupÈrer les donnÈes du formulaire
+            # R√©cup√©rer les donn√©es du formulaire
             registration_data = form.cleaned_data
-            
+
             # Appeler le service d'inscription
             user, error = RegistrationService.register_company(registration_data)
-            
+
             if user:
-                # GÈnÈrer et envoyer le code de vÈrification
+                # G√©n√©rer et envoyer le code de v√©rification
                 verification_code = VerificationService.generate_verification_code()
-                
-                # Stocker le code en session pour la vÈrification ultÈrieure
+
+                # Stocker le code en session pour la v√©rification ult√©rieure
                 request.session['verification_user_id'] = str(user.id)
                 request.session['verification_code'] = verification_code
                 request.session['verification_timestamp'] = timezone.now().isoformat()
-                
+
                 # Envoyer le code par email
-                VerificationCodeService.send_verification_code(user, verification_code)
-                
-                # Rediriger vers la page de vÈrification
+                success = VerificationCodeService.send_verification_code(user, verification_code)
+
+                # En mode d√©veloppement, afficher le code dans un message
+                if settings.DEBUG:
+                    messages.info(request, _(f"Code de v√©rification g√©n√©r√©: {verification_code}"))
+
+                # Rediriger vers la page de v√©rification
                 return redirect('verify_email')
             else:
                 messages.error(request, error)
     else:
         form = CompanyRegistrationForm()
-    
+
     return render(request, 'users/auth/register.html', {
-        'form': form, 
+        'form': form,
         'user_type': UserType.COMPANY,
         'user_type_display': UserType.COMPANY.label
     })
 
 def register_accountant_view(request):
     """Vue d'inscription pour les experts-comptables"""
+    # Si l'utilisateur est d√©j√† connect√©, l'avertir et le rediriger
     if request.user.is_authenticated:
+        messages.info(request, _("Vous √™tes d√©j√† connect√©. D√©connectez-vous pour cr√©er un nouveau compte."))
         return redirect('dashboard')
-        
-    # VÈrifier que le type d'utilisateur a ÈtÈ sÈlectionnÈ
+
+    # Debug - Afficher le token CSRF re√ßu
+    if settings.DEBUG and request.method == 'POST':
+        print(f"CSRF Debug: token received: {request.POST.get('csrfmiddlewaretoken')}")
+        print(f"CSRF Debug: cookie value: {request.COOKIES.get('csrftoken')}")
+
+    # V√©rifier que le type d'utilisateur a √©t√© s√©lectionn√© correctement
     if 'registration_user_type' not in request.session or request.session['registration_user_type'] != UserType.ACCOUNTANT:
+        # Rediriger vers la page de s√©lection
         return redirect('register_select_type')
-        
+
     if request.method == 'POST':
         form = AccountantRegistrationForm(request.POST)
         if form.is_valid():
-            # RÈcupÈrer les donnÈes du formulaire
+            # R√©cup√©rer les donn√©es du formulaire
             registration_data = form.cleaned_data
-            
+
             # Appeler le service d'inscription
             user, error = RegistrationService.register_accountant(registration_data)
-            
+
             if user:
-                # GÈnÈrer et envoyer le code de vÈrification
+                # G√©n√©rer et envoyer le code de v√©rification
                 verification_code = VerificationService.generate_verification_code()
-                
-                # Stocker le code en session pour la vÈrification ultÈrieure
+
+                # Stocker le code en session pour la v√©rification ult√©rieure
                 request.session['verification_user_id'] = str(user.id)
                 request.session['verification_code'] = verification_code
                 request.session['verification_timestamp'] = timezone.now().isoformat()
-                
+
                 # Envoyer le code par email
-                VerificationCodeService.send_verification_code(user, verification_code)
-                
-                # Rediriger vers la page de vÈrification
+                success = VerificationCodeService.send_verification_code(user, verification_code)
+
+                # En mode d√©veloppement, afficher le code dans un message
+                if settings.DEBUG:
+                    messages.info(request, _(f"Code de v√©rification g√©n√©r√©: {verification_code}"))
+
+                # Rediriger vers la page de v√©rification
                 return redirect('verify_email')
             else:
                 messages.error(request, error)
     else:
         form = AccountantRegistrationForm()
-    
+
     return render(request, 'users/auth/register.html', {
-        'form': form, 
+        'form': form,
         'user_type': UserType.ACCOUNTANT,
         'user_type_display': UserType.ACCOUNTANT.label
     })
 
 def verify_email_view(request):
-    """Vue de vÈrification de l'email avec le code"""
-    # VÈrifier que le processus de vÈrification est en cours
+    """Vue de v√©rification de l'email avec le code"""
+    # V√©rifier que le processus de v√©rification est en cours
     if 'verification_user_id' not in request.session:
         return redirect('register_select_type')
-    
+
     user_id = request.session.get('verification_user_id')
     user = get_object_or_404(User, id=user_id)
-    
+
     if request.method == 'POST':
         form = VerificationCodeForm(request.POST)
         if form.is_valid():
             input_code = form.cleaned_data.get('code')
             stored_code = request.session.get('verification_code')
-            
+
             # Convertir le timestamp en objet datetime
             timestamp_str = request.session.get('verification_timestamp')
             timestamp = timezone.datetime.fromisoformat(timestamp_str)
-            
-            # VÈrifier le code
+
+            # V√©rifier le code
             success, message = VerificationService.activate_user(
                 user, input_code, stored_code, timestamp
             )
-            
+
             if success:
-                # Nettoyer les donnÈes de session
+                # Nettoyer les donn√©es de session
                 for key in ['verification_user_id', 'verification_code', 'verification_timestamp', 'registration_user_type']:
                     if key in request.session:
                         del request.session[key]
-                
-                messages.success(request, _("Votre compte a ÈtÈ activÈ avec succËs. Vous pouvez maintenant vous connecter."))
+
+                messages.success(request, _("Votre compte a √©t√© activ√© avec succ√®s. Vous pouvez maintenant vous connecter."))
                 return redirect('login')
             else:
                 messages.error(request, message)
     else:
         form = VerificationCodeForm()
-    
+
     return render(request, 'users/auth/verify_email.html', {'form': form})
 
 def resend_verification_code_view(request):
-    """Vue pour renvoyer un code de vÈrification"""
-    # VÈrifier que le processus de vÈrification est en cours
+    """Vue pour renvoyer un code de v√©rification"""
+    # V√©rifier que le processus de v√©rification est en cours
     if 'verification_user_id' not in request.session:
         return redirect('register_select_type')
-    
+
     user_id = request.session.get('verification_user_id')
     user = get_object_or_404(User, id=user_id)
-    
-    # GÈnÈrer un nouveau code
+
+    # G√©n√©rer un nouveau code
     verification_code = VerificationService.generate_verification_code()
-    
-    # Mettre ‡ jour les donnÈes en session
+
+    # Mettre √† jour les donn√©es en session
     request.session['verification_code'] = verification_code
     request.session['verification_timestamp'] = timezone.now().isoformat()
-    
+
     # Envoyer le code par email
     success = VerificationCodeService.send_verification_code(user, verification_code)
-    
+
     if success:
-        messages.success(request, _("Un nouveau code de vÈrification a ÈtÈ envoyÈ ‡ votre adresse email."))
+        # Afficher le code directement dans l'interface (uniquement en d√©veloppement)
+        if settings.DEBUG:
+            messages.success(request, _(f"Un nouveau code de v√©rification a √©t√© envoy√© √† votre adresse email. Code: {verification_code}"))
+        else:
+            messages.success(request, _("Un nouveau code de v√©rification a √©t√© envoy√© √† votre adresse email."))
     else:
-        messages.error(request, _("Une erreur est survenue lors de l'envoi du code. Veuillez rÈessayer."))
-    
+        messages.error(request, _("Une erreur est survenue lors de l'envoi du code. Veuillez r√©essayer."))
+
     return redirect('verify_email')
 
 def password_reset_request_view(request):
-    """Vue de demande de rÈinitialisation de mot de passe"""
+    """Vue de demande de r√©initialisation de mot de passe"""
     if request.user.is_authenticated:
         return redirect('dashboard')
         
@@ -312,11 +444,11 @@ def password_reset_request_view(request):
                 user = User.objects.get(email=email)
                 PasswordResetService.send_password_reset_link(user)
             except User.DoesNotExist:
-                # Ne pas rÈvÈler si l'email existe dans la base
+                # Ne pas r√©v√©ler si l'email existe dans la base
                 pass
             
-            # Toujours afficher le mÍme message pour Èviter les fuites d'information
-            messages.success(request, _("Si votre email est associÈ ‡ un compte, un lien de rÈinitialisation vous a ÈtÈ envoyÈ."))
+            # Toujours afficher le m√™me message pour √©viter les fuites d'information
+            messages.success(request, _("Si votre email est associ√© √† un compte, un lien de r√©initialisation vous a √©t√© envoy√©."))
             return redirect('login')
     else:
         form = PasswordResetRequestForm()
@@ -324,15 +456,15 @@ def password_reset_request_view(request):
     return render(request, 'users/auth/password_reset_request.html', {'form': form})
 
 def password_reset_confirm_view(request, user_id, token):
-    """Vue de confirmation de rÈinitialisation de mot de passe"""
+    """Vue de confirmation de r√©initialisation de mot de passe"""
     if request.user.is_authenticated:
         return redirect('dashboard')
         
     user = get_object_or_404(User, id=user_id)
     
-    # VÈrifier la validitÈ du token
+    # V√©rifier la validit√© du token
     if not PasswordResetService.validate_password_reset_token(user, token):
-        messages.error(request, _("Le lien de rÈinitialisation est invalide ou a expirÈ."))
+        messages.error(request, _("Le lien de r√©initialisation est invalide ou a expir√©."))
         return redirect('password_reset_request')
     
     if request.method == 'POST':
@@ -340,12 +472,12 @@ def password_reset_confirm_view(request, user_id, token):
         if form.is_valid():
             form.save()
             
-            # RÈinitialiser les tentatives de connexion ÈchouÈes
+            # R√©initialiser les tentatives de connexion √©chou√©es
             user.failed_login_attempts = 0
             user.locked_until = None
             user.save(update_fields=['failed_login_attempts', 'locked_until'])
             
-            messages.success(request, _("Votre mot de passe a ÈtÈ rÈinitialisÈ avec succËs. Vous pouvez maintenant vous connecter."))
+            messages.success(request, _("Votre mot de passe a √©t√© r√©initialis√© avec succ√®s. Vous pouvez maintenant vous connecter."))
             return redirect('login')
     else:
         form = PasswordResetConfirmForm(user)
@@ -353,19 +485,19 @@ def password_reset_confirm_view(request, user_id, token):
     return render(request, 'users/auth/password_reset_confirm.html', {'form': form})
 
 def unlock_account_view(request, user_id, token):
-    """Vue de dÈblocage de compte"""
+    """Vue de d√©blocage de compte"""
     if request.user.is_authenticated:
         return redirect('dashboard')
         
     user = get_object_or_404(User, id=user_id)
     
-    # VÈrifier la validitÈ du token
+    # V√©rifier la validit√© du token
     if not PasswordResetService.validate_password_reset_token(user, token):
-        messages.error(request, _("Le lien de dÈblocage est invalide ou a expirÈ."))
+        messages.error(request, _("Le lien de d√©blocage est invalide ou a expir√©."))
         return redirect('login')
     
-    # DÈbloquer le compte
+    # D√©bloquer le compte
     user.unlock_account()
     
-    messages.success(request, _("Votre compte a ÈtÈ dÈbloquÈ avec succËs. Vous pouvez maintenant vous connecter."))
+    messages.success(request, _("Votre compte a √©t√© d√©bloqu√© avec succ√®s. Vous pouvez maintenant vous connecter."))
     return redirect('login')
