@@ -1,1 +1,26 @@
 # Contenu du CODEOWNERS ci-dessus
+# CODEOWNERS pour normx-ai
+# Ce fichier définit qui doit revoir les modifications de certains fichiers
+
+# Propriétaires globaux (seront notifiés pour toute modification)
+* @normx-ai
+
+# Frontend (React)
+/frontend/ @normx-ai @Tred95
+*.tsx @normx-ai @Tred95
+*.jsx @normx-ai @Tred95
+
+# Backend (Django)
+/apps/ @normx-ai
+*.py @normx-ai
+/apps/accounting/ @normx-ai
+
+# Configuration et déploiement
+*.json @normx-ai
+*.yaml @normx-ai
+*.yml @normx-ai
+.env.example @normx-ai
+
+# Documentation
+*.md @normx-ai @Tred95
+/docs/ @normx-ai @Tred95
