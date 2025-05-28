@@ -21,3 +21,9 @@ make setup
 
 # Lancer l'application
 make run
+
+# 1. Importer les comptes OHADA
+python manage.py tenant_command import_ohada_accounts --schema=testcompany
+
+# 2. Importer les journaux
+python manage.py tenant_command import_journaux --create-defaults --schema=testcompany

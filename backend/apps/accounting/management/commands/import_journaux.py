@@ -2,7 +2,7 @@ import json
 import os
 from django.core.management.base import BaseCommand
 from django.db import transaction
-from apps.accounting.models import Journal
+from apps.accounting.models import Journal, CompteOHADA
 
 
 class Command(BaseCommand):
@@ -77,25 +77,43 @@ class Command(BaseCommand):
                     )
                     continue
 
+                # Gérer le compte de contrepartie
+                compte_contrepartie = None
+                if journal_data.get('compte_contrepartie'):
+                    try:
+                        compte_contrepartie = CompteOHADA.objects.get(
+                            code=journal_data['compte_contrepartie']
+                        )
+                    except CompteOHADA.DoesNotExist:
+                        self.stdout.write(
+                            self.style.WARNING(
+                                f"Compte de contrepartie {journal_data['compte_contrepartie']} "
+                                f"non trouvé pour le journal {journal_data['code']}"
+                            )
+                        )
+
                 journal, created = Journal.objects.update_or_create(
                     code=journal_data['code'],
                     defaults={
                         'libelle': journal_data['libelle'],
                         'type': journal_data['type'],
+                        'compte_contrepartie': compte_contrepartie,
                         'is_active': journal_data.get('is_active', True),
                     }
                 )
 
                 if created:
                     created_count += 1
-                    self.stdout.write(
-                        self.style.SUCCESS(f"✓ Créé : {journal.code} - {journal.libelle}")
-                    )
+                    status = f"✓ Créé : {journal.code} - {journal.libelle}"
+                    if compte_contrepartie:
+                        status += f" → {compte_contrepartie.code}"
+                    self.stdout.write(self.style.SUCCESS(status))
                 else:
                     updated_count += 1
-                    self.stdout.write(
-                        self.style.INFO(f"↻ Mis à jour : {journal.code} - {journal.libelle}")
-                    )
+                    status = f"↻ Mis à jour : {journal.code} - {journal.libelle}"
+                    if compte_contrepartie:
+                        status += f" → {compte_contrepartie.code}"
+                    self.stdout.write(status)
 
         self.stdout.write(
             self.style.SUCCESS(
@@ -162,7 +180,7 @@ class Command(BaseCommand):
                 else:
                     updated_count += 1
                     self.stdout.write(
-                        self.style.INFO(f"↻ Existe déjà : {journal.code} - {journal.libelle}")
+                        f"↻ Existe déjà : {journal.code} - {journal.libelle}"
                     )
 
         self.stdout.write(

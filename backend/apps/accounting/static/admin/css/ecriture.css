@@ -1,0 +1,625 @@
+/* apps/accounting/static/admin/css/ecriture.css */
+/* Style Sage pour les écritures comptables dans Django Admin */
+
+/* ============================================
+   CONTAINER PRINCIPAL - STYLE SAGE
+   ============================================ */
+
+.module.aligned .form-row .field-box,
+.module.aligned .form-row .field-box .field {
+    margin-bottom: 0;
+}
+
+/* En-tête d'écriture - Style professionnel */
+.fieldset.module.aligned {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+.fieldset.module.aligned h2 {
+    background: linear-gradient(90deg, #2c3e50, #34495e);
+    color: white;
+    padding: 12px 15px;
+    margin: -1px -1px 15px -1px;
+    border-radius: 5px 5px 0 0;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* ============================================
+   BARRE D'OUTILS SAGE - COIN SUPERIEUR GAUCHE
+   ============================================ */
+
+/* Container pour la barre d'outils */
+.sage-toolbar {
+    position: absolute;
+    top: 10px;
+    left: 15px;
+    z-index: 100;
+    display: flex;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 8px;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    border: 1px solid #dee2e6;
+}
+
+/* Boutons de la barre d'outils */
+.sage-toolbar .btn-tool {
+    width: 32px;
+    height: 32px;
+    border: 1px solid #bdc3c7;
+    border-radius: 4px;
+    background: linear-gradient(180deg, #ffffff, #f8f9fa);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.sage-toolbar .btn-tool:hover {
+    background: linear-gradient(180deg, #e9ecef, #dee2e6);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.sage-toolbar .btn-tool:active {
+    transform: translateY(0);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Bouton supprimer (désactivé par défaut) */
+.sage-toolbar .btn-delete {
+    color: #95a5a6;
+    cursor: not-allowed;
+}
+
+.sage-toolbar .btn-delete.active {
+    color: #e74c3c;
+    cursor: pointer;
+    background: linear-gradient(180deg, #fff5f5, #fee);
+}
+
+/* Bouton ajouter */
+.sage-toolbar .btn-add {
+    color: #27ae60;
+}
+
+/* Bouton pièce jointe */
+.sage-toolbar .btn-attachment {
+    color: #3498db;
+}
+
+/* Tooltips pour les boutons */
+.sage-toolbar .btn-tool::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: -35px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #2c3e50;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 3px;
+    font-size: 11px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.sage-toolbar .btn-tool:hover::after {
+    opacity: 1;
+}
+
+/* ============================================
+   MASQUAGE DES ICONES DJANGO PAR DEFAUT
+   ============================================ */
+
+/* ============================================
+   MASQUAGE COMPLET DES ELEMENTS DJANGO PARASITES
+   ============================================ */
+
+/* Masquer TOUS les éléments Django non désirés */
+.tabular .add-row,
+.tabular .delete-row,
+.tabular .original,
+.tabular .field-name .help,
+.tabular thead th .text a,
+.tabular tbody tr .original p,
+.tabular .help,
+.tabular .deletelink,
+.tabular .addlink,
+.tabular .related-widget-wrapper,
+.tabular .form-row .help,
+.tabular tbody tr .tools,
+.tabular .inline-deletelink,
+.tabular .inline-addlink,
+.tabular .grp-tools,
+.tabular .module .grp-row .grp-cell .tools {
+    display: none !important;
+}
+
+/* Masquer spécifiquement les colonnes parasites */
+.tabular .field-DELETE,
+.tabular th.field-DELETE,
+.tabular td.field-DELETE {
+    display: none !important;
+}
+
+/* Masquer les icônes sous les champs */
+.tabular .field-box .related-widget-wrapper-link,
+.tabular .calendar,
+.tabular .clockbox,
+.tabular .selector-available,
+.tabular .selector-chosen,
+.tabular .selector,
+.tabular .vDateField + .help,
+.tabular .vTimeField + .help,
+.tabular .vDateTimeField + .help {
+    display: none !important;
+}
+
+/* Masquer tous les éléments avec class contenant "tool" */
+.tabular [class*="tool"],
+.tabular [class*="icon"],
+.tabular [class*="button"]:not(.sage-toolbar *) {
+    display: none !important;
+}
+
+/* Masquer les liens et boutons par défaut Django */
+.tabular a.add-another,
+.tabular a.related-lookup,
+.tabular a.delete-link,
+.tabular .deletelink-box,
+.tabular .changelink-box {
+    display: none !important;
+}
+
+/* S'assurer que nos propres éléments restent visibles */
+.sage-toolbar {
+    display: flex !important;
+    position: absolute !important;
+    top: 10px !important;
+    left: 15px !important;
+    z-index: 1000 !important;
+}
+
+.sage-toolbar .btn-tool {
+    display: flex !important;
+}
+
+.equilibre-container {
+    display: flex !important;
+}
+
+/* ============================================
+   GRILLE DES LIGNES - STYLE SAGE EPURE
+   ============================================ */
+
+/* Conteneur du tabular inline */
+.tabular.inline-related {
+    border: 2px solid #34495e;
+    border-radius: 5px;
+    background: white;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-top: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* En-tête du tableau style Sage */
+.tabular thead th {
+    background: linear-gradient(180deg, #ecf0f1, #d5dbdb);
+    border: 1px solid #bdc3c7;
+    color: #2c3e50;
+    font-weight: bold;
+    font-size: 12px;
+    text-align: center;
+    padding: 8px 5px;
+    white-space: nowrap;
+}
+
+/* Colonnes spécifiques avec largeurs fixes - ordre Sage */
+.tabular thead th:nth-child(1) { width: 40px; }   /* N° ligne */
+.tabular thead th:nth-child(2) { width: 60px; }   /* Date(j) */
+.tabular thead th:nth-child(3) { width: 120px; }  /* Compte */
+.tabular thead th:nth-child(4) { width: 100px; }  /* Tiers */
+.tabular thead th:nth-child(5) { width: 80px; }   /* Pièce */
+.tabular thead th:nth-child(6) { width: 180px; }  /* Libellé */
+.tabular thead th:nth-child(7) { width: 100px; }  /* Débit */
+.tabular thead th:nth-child(8) { width: 100px; }  /* Crédit */
+
+/* Masquer seulement les colonnes au-delà de la 8ème */
+.tabular thead th:nth-child(n+9) {
+    display: none !important;
+}
+.tabular tbody td:nth-child(n+9) {
+    display: none !important;
+}
+
+/* Checkbox de sélection de ligne */
+.sage-line-selector {
+    width: 16px;
+    height: 16px;
+    margin: 0 auto;
+    cursor: pointer;
+}
+
+/* Ligne sélectionnée */
+.tabular tbody tr.selected {
+    background-color: #e3f2fd !important;
+    border-left: 4px solid #3498db;
+}
+
+.tabular tbody tr.selected .sage-line-selector {
+    background: #3498db;
+}
+
+/* Corps du tableau - alternance comme Sage */
+.tabular tbody tr {
+    border-bottom: 1px solid #ecf0f1;
+}
+
+.tabular tbody tr:nth-child(odd) {
+    background-color: #ffffff;
+}
+
+.tabular tbody tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+.tabular tbody tr:hover {
+    background-color: #e3f2fd !important;
+    transition: background-color 0.2s ease;
+}
+
+/* Forcer l'affichage de toutes les bordures */
+.tabular {
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+}
+
+.tabular tbody td,
+.tabular thead th {
+    border: 1px solid #ecf0f1 !important;
+}
+
+/* Cellules du tableau */
+.tabular tbody td {
+    border-right: 1px solid #ecf0f1;
+    border-bottom: 1px solid #ecf0f1;
+    padding: 6px 5px;
+    font-size: 12px;
+    vertical-align: middle;
+    position: relative;
+}
+
+/* S'assurer que toutes les cellules ont des bordures */
+.tabular tbody tr td {
+    border: 1px solid #ecf0f1 !important;
+}
+
+/* Masquer les éléments "Aujourd'hui" et autres widgets date */
+.tabular tbody td .vDateField + *,
+.tabular tbody td .DateTimeShortcuts,
+.tabular tbody td .datetimeshortcuts,
+.tabular tbody td .calendar,
+.tabular tbody td .clockbox,
+.tabular tbody td .timezonewarning,
+.tabular tbody td .help,
+.tabular tbody td .related-widget-wrapper-link {
+    display: none !important;
+}
+
+/* Masquer spécifiquement le texte "Aujourd'hui" */
+.tabular tbody td:contains("Aujourd'hui") {
+    font-size: 0;
+}
+
+.tabular tbody td .vDateField ~ * {
+    display: none !important;
+}
+
+/* Champs de saisie dans les cellules */
+.tabular tbody td input[type="text"],
+.tabular tbody td input[type="number"],
+.tabular tbody td select {
+    width: 100%;
+    border: 1px solid #ced4da;
+    border-radius: 3px;
+    padding: 4px 6px;
+    font-size: 12px;
+    background: white;
+}
+
+.tabular tbody td input[type="text"]:focus,
+.tabular tbody td input[type="number"]:focus,
+.tabular tbody td select:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+    outline: none;
+}
+
+/* ============================================
+   COLONNES MONETAIRES - STYLE COMPTABLE
+   ============================================ */
+
+/* Champs débit et crédit - alignement droite */
+.field-montant_debit input,
+.field-montant_credit input {
+    text-align: right;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-weight: bold;
+    background: #f8f9fa;
+}
+
+.field-montant_debit input:focus,
+.field-montant_credit input:focus {
+    background: white;
+}
+
+/* Coloration des montants */
+.field-montant_debit input {
+    border-left: 3px solid #e74c3c;
+}
+
+.field-montant_credit input {
+    border-left: 3px solid #27ae60;
+}
+
+/* ============================================
+   ZONE D'EQUILIBRE - STYLE SAGE
+   ============================================ */
+
+/* Ligne d'équilibre en bas comme Sage */
+.tabular::after {
+    content: "";
+    display: block;
+    clear: both;
+}
+
+/* Conteneur pour affichage équilibre */
+.equilibre-container {
+    background: linear-gradient(180deg, #2c3e50, #34495e);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 0 0 5px 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-weight: bold;
+    font-size: 13px;
+}
+
+.equilibre-totaux {
+    display: flex;
+    gap: 30px;
+}
+
+.equilibre-totaux span {
+    padding: 5px 10px;
+    border-radius: 3px;
+    background: rgba(255,255,255,0.1);
+}
+
+.equilibre-status.ok {
+    color: #2ecc71;
+}
+
+.equilibre-status.error {
+    color: #e74c3c;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+/* ============================================
+   CHAMPS SPECIFIQUES
+   ============================================ */
+
+/* Champ numéro de ligne */
+.field-numero_ligne input {
+    text-align: center;
+    font-weight: bold;
+    background: #ecf0f1;
+    color: #34495e;
+}
+
+/* Champ compte */
+.field-compte select {
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 11px;
+}
+
+/* Champ pièce */
+.field-piece input {
+    text-transform: uppercase;
+    background: #fff3cd;
+}
+
+/* ============================================
+   BOUTONS ET ACTIONS
+   ============================================ */
+
+/* Boutons d'action style Sage */
+.btn-sage {
+    background: linear-gradient(180deg, #3498db, #2980b9);
+    color: white;
+    border: 1px solid #2980b9;
+    border-radius: 3px;
+    padding: 6px 12px;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    margin: 2px;
+    transition: all 0.2s ease;
+}
+
+.btn-sage:hover {
+    background: linear-gradient(180deg, #2980b9, #21618c);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.btn-sage.valider {
+    background: linear-gradient(180deg, #27ae60, #229954);
+    border-color: #229954;
+}
+
+.btn-sage.dupliquer {
+    background: linear-gradient(180deg, #f39c12, #e67e22);
+    border-color: #e67e22;
+}
+
+/* Champ date de ligne */
+.field-date_ligne input {
+    text-align: center;
+    font-family: 'Consolas', 'Monaco', monospace;
+    background: #f8f9fa;
+    width: 50px;
+}
+
+/* ============================================
+   RESPONSIVE - ADAPTATION PETITS ECRANS
+   ============================================ */
+
+@media (max-width: 1200px) {
+    .tabular thead th:nth-child(6) { width: 150px; } /* Libellé plus court */
+    .tabular thead th:nth-child(4) { display: none; } /* Masquer tiers */
+    .tabular tbody td:nth-child(4) { display: none; }
+}
+
+@media (max-width: 900px) {
+    .tabular thead th:nth-child(5) { display: none; } /* Masquer pièce */
+    .tabular tbody td:nth-child(5) { display: none; }
+    .tabular thead th:nth-child(2) { display: none; } /* Masquer date */
+    .tabular tbody td:nth-child(2) { display: none; }
+}
+
+/* ============================================
+   AMÉLIORATIONS UX
+   ============================================ */
+
+/* Survol des lignes */
+.tabular tbody tr.selected {
+    background-color: #e8f4fd !important;
+    border-left: 4px solid #3498db;
+}
+
+/* Focus sur une ligne en cours d'édition */
+.tabular tbody tr.editing {
+    box-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+    border-left: 4px solid #3498db;
+}
+
+/* Messages d'erreur */
+.errorlist {
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+    border-radius: 3px;
+    padding: 5px 10px;
+    margin: 5px 0;
+    font-size: 11px;
+}
+
+/* Messages de succès */
+.successlist {
+    background: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+    border-radius: 3px;
+    padding: 5px 10px;
+    margin: 5px 0;
+    font-size: 11px;
+}
+
+/* ============================================
+   BADGES ET INDICATEURS
+   ============================================ */
+
+/* Badge statut */
+.badge-statut {
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.badge-brouillon {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.badge-validee {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.badge-cloturee {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Indicateur d'équilibre */
+.equilibre-indicator {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.equilibre-indicator.ok {
+    background: #27ae60;
+    box-shadow: 0 0 5px rgba(39, 174, 96, 0.5);
+}
+
+.equilibre-indicator.error {
+    background: #e74c3c;
+    box-shadow: 0 0 5px rgba(231, 76, 60, 0.5);
+}
+
+/* ============================================
+   PRINT STYLES - IMPRESSION
+   ============================================ */
+
+@media print {
+    .btn-sage,
+    .add-row,
+    .delete-row {
+        display: none !important;
+    }
+
+    .tabular {
+        border: 2px solid #000 !important;
+    }
+
+    .tabular thead th {
+        background: #f0f0f0 !important;
+        color: #000 !important;
+    }
+
+    .equilibre-container {
+        background: #000 !important;
+        color: #fff !important;
+    }
+}

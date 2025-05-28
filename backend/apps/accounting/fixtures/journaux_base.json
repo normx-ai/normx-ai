@@ -1,0 +1,178 @@
+[
+  {
+    "model": "accounting.Journal",
+    "pk": 1,
+    "fields": {
+      "code": "AC",
+      "libelle": "Journal des Achats",
+      "type": "AC",
+      "compte_contrepartie": null,
+      "is_active": true
+    }
+  },
+  {
+    "model": "accounting.Journal",
+    "pk": 2,
+    "fields": {
+      "code": "VT",
+      "libelle": "Journal des Ventes",
+      "type": "VT",
+      "compte_contrepartie": null,
+      "is_active": true
+    }
+  },
+  {
+    "model": "accounting.Journal",
+    "pk": 3,
+    "fields": {
+      "code": "BQ1",
+      "libelle": "Banque Principale",
+      "type": "BQ",
+      "compte_contrepartie": "52110000",
+      "is_active": true
+    }
+  },
+  {
+    "model": "accounting.Journal",
+    "pk": 4,
+    "fields": {
+      "code": "CA1",
+      "libelle": "Caisse Principale",
+      "type": "CA",
+      "compte_contrepartie": "57110000",
+      "is_active": true
+    }
+  },
+  {
+    "model": "accounting.Journal",
+    "pk": 5,
+    "fields": {
+      "code": "PA",
+      "libelle": "Journal de Paie",
+      "type": "PA",
+      "compte_contrepartie": null,
+      "is_active": true
+    }
+  },
+  {
+    "model": "accounting.Journal",
+    "pk": 6,
+    "fields": {
+      "code": "FI",
+      "libelle": "Journal Fiscal - Déclarations",
+      "type": "FI",
+      "compte_contrepartie": null,
+      "is_active": true
+    }
+  },
+  {
+    "model": "accounting.Journal",
+    "pk": 7,
+    "fields": {
+      "code": "SO",
+      "libelle": "Journal Social - CNSS",
+      "type": "SO",
+      "compte_contrepartie": null,
+      "is_active": true
+    }
+  },
+  {
+    "model": "accounting.Journal",
+    "pk": 8,
+    "fields": {
+      "code": "ST",
+      "libelle": "Journal des Stocks",
+      "type": "ST",
+      "compte_contrepartie": null,
+      "is_active": true
+    }
+  },
+  {
+    "model": "accounting.Journal",
+    "pk": 9,
+    "fields": {
+      "code": "IM",
+      "libelle": "Journal des Immobilisations",
+      "type": "IM",
+      "compte_contrepartie": null,
+      "is_active": true
+    }
+  },
+  {
+    "model": "accounting.Journal",
+    "pk": 10,
+    "fields": {
+      "code": "PR",
+      "libelle": "Journal des Provisions",
+      "type": "PR",
+      "compte_contrepartie": null,
+      "is_active": true
+    }
+  },
+  {
+    "model": "accounting.Journal",
+    "pk": 11,
+    "fields": {
+      "code": "AN",
+      "libelle": "Journal des À Nouveaux",
+      "type": "AN",
+      "compte_contrepartie": null,
+      "is_active": true
+    }
+  },
+  {
+    "model": "accounting.Journal",
+    "pk": 12,
+    "fields": {
+      "code": "CL",
+      "libelle": "Journal de Clôture",
+      "type": "CL",
+      "compte_contrepartie": null,
+      "is_active": true
+    }
+  },
+  {
+    "model": "accounting.Journal",
+    "pk": 13,
+    "fields": {
+      "code": "OD",
+      "libelle": "Opérations Diverses",
+      "type": "OD",
+      "compte_contrepartie": null,
+      "is_active": true
+    }
+  },
+  {
+    "model": "accounting.Journal",
+    "pk": 14,
+    "fields": {
+      "code": "EX",
+      "libelle": "Extra-comptable",
+      "type": "EX",
+      "compte_contrepartie": null,
+      "is_active": true
+    }
+  },
+  {
+    "model": "accounting.Journal",
+    "pk": 15,
+    "fields": {
+      "code": "BQ2",
+      "libelle": "Banque Secondaire",
+      "type": "BQ",
+      "compte_contrepartie": "52120000",
+      "is_active": true
+    }
+  },
+  {
+    "model": "accounting.Journal",
+    "pk": 16,
+    "fields": {
+      "code": "CA2",
+      "libelle": "Caisse Secondaire",
+      "type": "CA",
+      "compte_contrepartie": "57120000",
+      "is_active": true
+    }
+  }
+]
